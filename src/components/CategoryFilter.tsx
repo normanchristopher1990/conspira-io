@@ -35,9 +35,12 @@ export default function CategoryFilter({ selected, onChange }: Props) {
   }, []);
 
   return (
-    <div className="-mx-4 relative">
-      <div ref={scrollRef} className="px-4 overflow-x-auto scroll-hide">
-        <div className="flex items-center gap-2 min-w-max py-1">
+    <div className="relative md:-mx-4">
+      <div
+        ref={scrollRef}
+        className="md:px-4 md:overflow-x-auto scroll-hide"
+      >
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 md:min-w-max py-1">
           <Chip
             active={selected === 'all'}
             onClick={() => onChange('all')}
@@ -56,13 +59,13 @@ export default function CategoryFilter({ selected, onChange }: Props) {
         </div>
       </div>
 
-      {/* Right-edge fade — hints at off-screen chips, hides at end of scroll. */}
+      {/* Right-edge fade — only relevant on desktop (mobile chips wrap). */}
       <div
         aria-hidden
         className={
           'pointer-events-none absolute inset-y-0 right-0 w-12 ' +
           'bg-gradient-to-l from-bg via-bg/80 to-transparent ' +
-          'transition-opacity duration-200 ' +
+          'transition-opacity duration-200 hidden md:block ' +
           (hasMore ? 'opacity-100' : 'opacity-0')
         }
       />

@@ -80,7 +80,9 @@ export default function HomePage() {
 
       <section className="space-y-4">
         <CategoryFilter selected={category} onChange={setCategory} />
-        <SortBar value={sort} onChange={setSort} count={total} />
+        <div className="hidden md:block">
+          <SortBar value={sort} onChange={setSort} count={total} />
+        </div>
       </section>
 
       <section className="mt-6 grid gap-5">

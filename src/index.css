@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply text-ink antialiased;
+    font-family: 'Sora', ui-sans-serif, system-ui, sans-serif;
+    background-color: #F7F9FC;
+  }
+  body {
+    @apply min-h-screen bg-bg text-ink;
+  }
+  ::selection {
+    background: #185FA5;
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  .font-mono-num {
+    font-family: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+  }
+  .scroll-hide::-webkit-scrollbar { display: none; }
+  .scroll-hide { scrollbar-width: none; }
+}

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(extract-text \"C:/Users/Admin/Conspira.io/Conspira_io_Concept_v2.docx\")",
+      "Bash(where pandoc *)",
+      "Bash(pandoc --version)",
+      "Bash(python \"C:/Users/Admin/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/444d2ecc-2261-45ec-82f9-388324a7c964/6022012d-53cc-4377-9a8a-d848e56d05db/skills/docx/scripts/office/unpack.py\" Conspira_io_Concept_v2.docx unpacked/)",
+      "Bash(unzip -o Conspira_io_Concept_v2.docx -d unpacked/)",
+      "Bash(npm --version)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name -First 5; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue | Select-Object Name -First 5; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name -First 5; where.exe node 2>$null; where.exe npm 2>$null)",
+      "WebSearch",
+      "WebFetch(domain:www.youtube.com)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)"
+    ]
+  }
+}

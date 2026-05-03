@@ -1,4 +1,5 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import RequireAuth from './components/RequireAuth';
 import { AuthProvider } from './lib/auth';
@@ -25,7 +26,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-bg flex flex-col">
+        <div className="min-h-screen bg-bg flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <Header />
           <div className="flex-1">
             <Routes>
@@ -61,6 +62,7 @@ export default function App() {
             </Routes>
           </div>
           <Footer />
+          <BottomNav />
         </div>
       </BrowserRouter>
     </AuthProvider>

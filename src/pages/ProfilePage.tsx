@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { useAuth } from '../lib/auth';
 import { useProfile, useUserTheories } from '../lib/hooks';
@@ -41,6 +41,13 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
   const [tab, setTab] = useState<Tab>('theories');
   const { data: profile, loading, error } = useProfile(username);
   const { data: theories } = useUserTheories(profile?.id);
+  const { isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    navigate('/');
+  }
 
   if (loading) {
     return (
@@ -116,12 +123,29 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
               </span>
             )}
             {isMe && (
-              <Link
-                to="/me/edit"
-                className="text-[11px] font-medium text-brand hover:underline"
-              >
-                Edit profile →
-              </Link>
+              <div className="flex flex-col items-end gap-1">
+                <Link
+                  to="/me/edit"
+                  className="text-[11px] font-medium text-brand hover:underline"
+                >
+                  Edit profile →
+                </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-[11px] font-medium text-brand hover:underline"
+                  >
+                    Admin panel →
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="text-[11px] font-medium text-muted hover:text-score-bad"
+                >
+                  Sign out
+                </button>
+              </div>
             )}
           </div>
         </div>

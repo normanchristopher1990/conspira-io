@@ -2,19 +2,11 @@ type Props = {
   score: number; // 1..9
 };
 
-// One distinct colour per position. 1 is deep red, 4 is orange, 5 is the
-// neutral grey "undetermined" marker, 6 is light green, 9 is deep green.
-const POSITION_COLOR: Record<number, string> = {
-  1: '#991B1B', // deep red
-  2: '#DC2626', // red
-  3: '#EA580C', // red-orange
-  4: '#F97316', // orange
-  5: '#EAB308', // yellow
-  6: '#4ADE80', // light green
-  7: '#22C55E', // green
-  8: '#16A34A', // dark-medium green
-  9: '#166534', // deep green
-};
+function colorFor(score: number): string {
+  if (score <= 4) return '#EF4444';   // fire-red
+  if (score === 5) return '#EAB308';  // yellow
+  return '#16A34A';                   // green
+}
 
 function labelFor(score: number): string {
   if (score <= 2) return 'Almost certainly false';
@@ -26,7 +18,7 @@ function labelFor(score: number): string {
 
 export default function ScoreBar({ score }: Props) {
   const clamped = Math.max(1, Math.min(9, Math.round(score)));
-  const accent = POSITION_COLOR[clamped];
+  const accent = colorFor(clamped);
 
   return (
     <div className="w-full">
@@ -49,8 +41,7 @@ export default function ScoreBar({ score }: Props) {
               key={n}
               className="h-2 rounded-sm transition-all"
               style={{
-                backgroundColor: POSITION_COLOR[n],
-                opacity: isActive ? 1 : 0.45,
+                backgroundColor: isActive ? accent : '#E2E8F0',
                 boxShadow: isActive ? `0 0 0 2px ${accent}33` : undefined,
               }}
             />

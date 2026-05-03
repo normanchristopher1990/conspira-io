@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
+import { localizeTheory } from '../lib/localize';
 import type { Theory } from '../lib/types';
 import CategoryBanner from './CategoryBanner';
 import ScoreBar from './ScoreBar';
@@ -14,14 +15,15 @@ function formatCount(n: number): string {
 }
 
 export default function TheoryCard({ theory }: Props) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { title, summary } = localizeTheory(theory, lang);
   return (
     <article className="group bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden transition-shadow hover:shadow-md">
       <CategoryBanner category={theory.category} />
 
       <div className="p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
         <div className="min-w-0">
-          <YouTubeThumbnail videoId={theory.youtubeId} title={theory.title} />
+          <YouTubeThumbnail videoId={theory.youtubeId} title={title} />
         </div>
 
         <div className="min-w-0 flex flex-col">
@@ -30,12 +32,12 @@ export default function TheoryCard({ theory }: Props) {
               to={`/theory/${theory.id}`}
               className="hover:text-brand transition-colors"
             >
-              {theory.title}
+              {title}
             </Link>
           </h2>
 
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            {theory.summary}
+            {summary}
           </p>
 
           <div className="mt-4">

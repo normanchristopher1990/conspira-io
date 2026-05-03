@@ -12,6 +12,7 @@ import { useAuth } from '../lib/auth';
 import { getCategory } from '../lib/categories';
 import { useAiReview, useComments, useEvidence, useTheory } from '../lib/hooks';
 import { useI18n, type Strings } from '../lib/i18n';
+import { localizeTheory } from '../lib/localize';
 import type { Evidence, EvidenceScore } from '../lib/types';
 
 type Tab = 'evidence' | 'discussion' | 'timeline';
@@ -36,7 +37,7 @@ export default function TheoryDetailPage() {
   const { data: aiReview } = useAiReview(id);
   const { data: comments } = useComments(id);
   const { profile: meProfile, isAdmin } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState<Tab>('evidence');
@@ -101,6 +102,7 @@ export default function TheoryDetailPage() {
   const cat = getCategory(theory.category);
   const evidenceCount = (allEvidence ?? []).length;
   const commentCount = (comments ?? []).length;
+  const localized = localizeTheory(theory, lang);
 
   return (
     <main className="mx-auto max-w-4xl px-4 pb-16">
@@ -181,16 +183,16 @@ export default function TheoryDetailPage() {
           </span>
 
           <h1 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
-            {theory.title}
+            {localized.title}
           </h1>
 
           <p className="mt-3 text-base text-slate-600 leading-relaxed">
-            {theory.summary}
+            {localized.summary}
           </p>
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-6">
             <div>
-              <YouTubeEmbed videoId={theory.youtubeId} title={theory.title} />
+              <YouTubeEmbed videoId={theory.youtubeId} title={localized.title} />
             </div>
             <div className="rounded-lg ring-1 ring-line bg-slate-50 p-4">
               <h2 className="text-xs uppercase tracking-widest text-muted">

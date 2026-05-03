@@ -20,6 +20,10 @@ type TheoryRow = {
   id: string;
   title: string;
   summary: string;
+  title_en: string | null;
+  title_de: string | null;
+  summary_en: string | null;
+  summary_de: string | null;
   category_slug: CategorySlug;
   youtube_id: string | null;
   status: 'draft' | 'pending_ai' | 'pending_admin' | 'accepted' | 'rejected';
@@ -52,6 +56,10 @@ function rowToTheory(row: TheoryRow, usernamesById: Map<string, string>): Theory
     id: row.id,
     title: row.title,
     summary: row.summary,
+    titleEn: row.title_en,
+    titleDe: row.title_de,
+    summaryEn: row.summary_en,
+    summaryDe: row.summary_de,
     category: row.category_slug,
     youtubeId: row.youtube_id,
     status: row.status,
@@ -255,6 +263,13 @@ export async function setTheoryStatus(
   if (!supabase) throw new Error('Supabase not configured');
   const { error } = await supabase.from('theories').update({ status }).eq('id', id);
   if (error) throw error;
+  // On approval, refresh translations in case the theory was edited
+  // during review. Best-effort.
+  if (status === 'accepted') {
+    void supabase.functions
+      .invoke('translate-theory', { body: { theory_id: id } })
+      .catch(() => {});
+  }
 }
 
 // ---------- Owner edit / delete ----------
@@ -321,13 +336,15 @@ export async function submitTheory(
     if (eErr) throw eErr;
   }
 
-  // Fire the AI review in the background. Failure here doesn't block
-  // submission — admins can re-trigger it from the queue.
+  // Fire the AI review and translation in parallel — both are
+  // best-effort and shouldn't block submission. Admins can re-trigger
+  // the review from the queue; translation auto-runs again on approval.
   void supabase.functions
     .invoke('review-submission', { body: { theory_id: t.id } })
-    .catch(() => {
-      /* swallow — review is best-effort */
-    });
+    .catch(() => {});
+  void supabase.functions
+    .invoke('translate-theory', { body: { theory_id: t.id } })
+    .catch(() => {});
 
   return { id: t.id as string };
 }

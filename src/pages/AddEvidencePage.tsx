@@ -8,6 +8,7 @@ import { useAuth } from '../lib/auth';
 import { EVIDENCE_TYPE_META } from '../lib/evidenceTypes';
 import { useTheory } from '../lib/hooks';
 import { useI18n } from '../lib/i18n';
+import { localizeTheory } from '../lib/localize';
 import type { EvidenceType } from '../lib/types';
 import {
   emptyEvidence,
@@ -31,7 +32,7 @@ const EVIDENCE_TYPE_OPTIONS: EvidenceType[] = [
 export default function AddEvidencePage() {
   const { id } = useParams<{ id: string }>();
   const { user, isConfigured } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const { data: theory, loading } = useTheory(id);
 
@@ -130,7 +131,7 @@ export default function AddEvidencePage() {
         <p className="mt-1 text-sm text-slate-600">
           {t.addEvidence.intro(
             <Link to={`/theory/${id}`} className="text-ink underline">
-              {theory.title}
+              {localizeTheory(theory, lang).title}
             </Link>,
           )}
         </p>

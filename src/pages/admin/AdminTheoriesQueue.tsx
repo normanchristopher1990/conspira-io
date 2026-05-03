@@ -5,9 +5,10 @@ import { setTheoryStatus, triggerReview } from '../../lib/api';
 import { getCategory } from '../../lib/categories';
 import { usePendingTheories, useRealtimeTable } from '../../lib/hooks';
 import { useI18n } from '../../lib/i18n';
+import { localizeTheory } from '../../lib/localize';
 
 export default function AdminTheoriesQueue() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { data, loading, error, refetch } = usePendingTheories();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -73,6 +74,7 @@ export default function AdminTheoriesQueue() {
           (data ?? []).map((theoryRow) => {
             const cat = getCategory(theoryRow.category);
             const busy = busyId === theoryRow.id;
+            const localized = localizeTheory(theoryRow, lang);
             return (
               <article
                 key={theoryRow.id}
@@ -91,7 +93,7 @@ export default function AdminTheoriesQueue() {
                         to={`/theory/${theoryRow.id}`}
                         className="hover:text-brand transition-colors"
                       >
-                        {theoryRow.title}
+                        {localized.title}
                       </Link>
                     </h2>
                     <p className="mt-0.5 text-xs text-muted">
@@ -114,7 +116,7 @@ export default function AdminTheoriesQueue() {
                 </header>
 
                 <p className="mt-3 text-sm text-slate-600 leading-relaxed">
-                  {theoryRow.summary}
+                  {localized.summary}
                 </p>
 
                 <div className="mt-4 flex items-center justify-end gap-2">

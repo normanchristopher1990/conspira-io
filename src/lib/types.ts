@@ -24,8 +24,12 @@ export type TheoryStatus = 'draft' | 'pending_ai' | 'pending_admin' | 'accepted'
 
 export type Theory = {
   id: string;
-  title: string;
+  title: string;        // canonical original — what the submitter typed
   summary: string;
+  titleEn?: string | null;   // Claude-translated English version
+  titleDe?: string | null;   // Claude-translated German version
+  summaryEn?: string | null;
+  summaryDe?: string | null;
   category: CategorySlug;
   score: number; // 1..9
   evidenceCount: number;

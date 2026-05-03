@@ -90,7 +90,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
-              @{profile.username}
+              {profile.username}
             </h1>
             {profile.real_name && (
               <p className="mt-1 text-sm text-slate-600">{profile.real_name}</p>
@@ -202,7 +202,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
         <section className="mt-5 rounded-xl bg-white ring-1 ring-line p-6 space-y-3 text-sm text-slate-700">
           <p>
             <span className="text-muted">Username:</span>{' '}
-            <span className="font-mono-num text-ink">@{profile.username}</span>
+            <span className="font-mono-num text-ink">{profile.username}</span>
           </p>
           <p>
             <span className="text-muted">Rank:</span>{' '}

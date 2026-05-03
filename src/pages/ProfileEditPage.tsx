@@ -100,7 +100,7 @@ export default function ProfileEditPage() {
         </h1>
         {meBasic && (
           <p className="mt-1 text-xs text-muted">
-            Signed in as @{meBasic.username}
+            Signed in as {meBasic.username}
           </p>
         )}
       </div>

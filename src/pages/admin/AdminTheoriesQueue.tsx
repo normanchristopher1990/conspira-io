@@ -97,7 +97,7 @@ export default function AdminTheoriesQueue() {
                         to={`/u/${t.submittedBy}`}
                         className="text-slate-500 hover:text-brand"
                       >
-                        @{t.submittedBy}
+                        {t.submittedBy}
                       </Link>{' '}
                       ·{' '}
                       <span className="font-mono-num">

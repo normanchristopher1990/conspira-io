@@ -68,7 +68,7 @@ export default function CommentsSection({ theoryId }: Props) {
             <p className="text-xs text-muted">
               Commenting as{' '}
               <Link to="/me" className="font-medium text-ink hover:text-brand">
-                @{profile?.username ?? 'you'}
+                {profile?.username ?? 'you'}
               </Link>
             </p>
             <textarea
@@ -168,7 +168,7 @@ function CommentRow({
             to={`/u/${comment.author.username}`}
             className="text-sm font-semibold text-ink hover:text-brand"
           >
-            @{comment.author.username}
+            {comment.author.username}
           </Link>
           <span
             className={

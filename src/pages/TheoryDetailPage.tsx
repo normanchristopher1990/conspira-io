@@ -201,7 +201,7 @@ export default function TheoryDetailPage() {
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <Stat label="Evidence" value={`${theory.evidenceCount}`} />
                 <Stat label="Independent sources" value={`${theory.independentSources}`} />
-                <Stat label="Submitted by" value={`@${theory.submittedBy}`} mono={false} />
+                <Stat label="Submitted by" value={theory.submittedBy} mono={false} />
                 <Stat
                   label="Submitted"
                   value={new Date(theory.submittedAt).toLocaleDateString(undefined, {

@@ -26,7 +26,7 @@ export default function Header() {
           >
             C
           </span>
-          <span className="font-semibold tracking-tight text-ink text-lg sm:text-base">
+          <span className="font-semibold tracking-tight text-ink text-2xl sm:text-xl">
             Conspira
           </span>
         </Link>
@@ -40,7 +40,7 @@ export default function Header() {
                 to="/me"
                 className="hidden sm:inline text-xs text-muted hover:text-brand"
               >
-                @{profile?.username ?? '…'}
+                {profile?.username ?? '…'}
               </Link>
               <button
                 type="button"

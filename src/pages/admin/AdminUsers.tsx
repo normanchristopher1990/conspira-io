@@ -61,7 +61,7 @@ export default function AdminUsers() {
                         to={`/u/${p.username}`}
                         className="text-ink hover:text-brand"
                       >
-                        @{p.username}
+                        {p.username}
                       </Link>
                       {p.real_name && (
                         <span className="ml-2 text-muted">{p.real_name}</span>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import CategoryDrawer from '../components/CategoryDrawer';
 import CategoryFilter from '../components/CategoryFilter';
 import SortBar from '../components/SortBar';
 import TheoryCard from '../components/TheoryCard';
@@ -18,6 +19,8 @@ export default function HomePage() {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const filterActive = category !== 'all';
 
   // Reset and load whenever filter / sort changes.
   useEffect(() => {
@@ -79,11 +82,38 @@ export default function HomePage() {
       </section>
 
       <section className="space-y-4">
-        <CategoryFilter selected={category} onChange={setCategory} />
-        <div className="hidden md:block">
+        {/* Desktop: pills + sort */}
+        <div className="hidden md:block space-y-4">
+          <CategoryFilter selected={category} onChange={setCategory} />
           <SortBar value={sort} onChange={setSort} count={total} />
         </div>
+
+        {/* Mobile: filter button (top-right) opens the drawer */}
+        <div className="md:hidden flex justify-end">
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            aria-label={t.home.filter}
+            className="relative inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-3 py-1.5 text-sm font-medium text-ink hover:border-slate-300"
+          >
+            <FilterIcon />
+            {t.home.filter}
+            {filterActive && (
+              <span
+                aria-hidden
+                className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand ring-2 ring-bg"
+              />
+            )}
+          </button>
+        </div>
       </section>
+
+      <CategoryDrawer
+        open={drawerOpen}
+        selected={category}
+        onSelect={setCategory}
+        onClose={() => setDrawerOpen(false)}
+      />
 
       <section className="mt-6 grid gap-5">
         {error ? (
@@ -124,5 +154,22 @@ export default function HomePage() {
         )}
       </section>
     </main>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4 text-slate-600"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M4 5h16l-6 8v6l-4-2v-4z" />
+    </svg>
   );
 }

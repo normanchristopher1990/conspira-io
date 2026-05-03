@@ -13,6 +13,9 @@ const STORAGE_KEY = 'conspira.lang';
 const DEFAULT_LANG: Lang = 'en';
 
 // Single canonical structure — the German dictionary mirrors this shape.
+// NOTE: no `as const` here. We want the inferred type to widen string
+// literals to `string` so DE can supply different strings while still
+// matching the structure key-for-key.
 export const EN = {
   nav: { home: 'Home', search: 'Search', submit: 'Submit', profile: 'Profile' },
   header: {
@@ -631,7 +634,7 @@ export const EN = {
     submit: 'Submit',
     version: 'v0.1 · preview',
   },
-} as const;
+};
 
 export type Strings = typeof EN;
 

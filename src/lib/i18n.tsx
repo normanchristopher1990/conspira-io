@@ -46,6 +46,25 @@ export const EN = {
     failedToLoad: (msg: string) => `Failed to load theories: ${msg}`,
     loadMore: (remaining: number) => `Load more · ${remaining} remaining`,
     loadingMore: 'Loading…',
+    howItWorks: {
+      title: 'How scoring works',
+      step1Title: 'Submit a theory',
+      step1Body: 'Title, summary, category, optional video. At least one piece of evidence is required.',
+      step2Title: 'Evidence is scored 0–5',
+      step2Body: 'Each piece is rated by reliability, source independence, and verifiability.',
+      step3Title: 'Theory gets a 1–9 score',
+      step3Body: 'Computed from the strongest evidence, the average, and the number of independent sources.',
+    },
+    cta: {
+      title: 'Have evidence? Submit a theory.',
+      body: 'Add to the catalogue. Verifiable evidence only — pure-text claims are auto-rejected.',
+      button: 'Submit a theory',
+    },
+    joinRanks: {
+      title: 'Join to earn ranks from Rekrut to General',
+      body: 'Verified experts get domain badges and start at the Leutnant rank.',
+      button: 'Create an account',
+    },
   },
   card: {
     evidence: 'evidence',
@@ -641,6 +660,7 @@ export const EN = {
     takedowns: 'Takedowns',
     support: 'Support',
     submit: 'Submit',
+    proposeCategory: 'Propose a category',
     version: 'v0.1 · preview',
   },
 };
@@ -677,6 +697,25 @@ export const DE: Strings = {
     failedToLoad: (msg: string) => `Theorien konnten nicht geladen werden: ${msg}`,
     loadMore: (remaining: number) => `Mehr laden · ${remaining} verbleibend`,
     loadingMore: 'Lädt…',
+    howItWorks: {
+      title: 'Wie die Bewertung funktioniert',
+      step1Title: 'Theorie einreichen',
+      step1Body: 'Titel, Zusammenfassung, Kategorie, optionales Video. Mindestens ein Beweis erforderlich.',
+      step2Title: 'Beweise werden 0–5 bewertet',
+      step2Body: 'Jeder Beweis wird nach Verlässlichkeit, Quellenunabhängigkeit und Überprüfbarkeit bewertet.',
+      step3Title: 'Theorie erhält 1–9 Bewertung',
+      step3Body: 'Berechnet aus stärkstem Beweis, Durchschnitt und Anzahl unabhängiger Quellen.',
+    },
+    cta: {
+      title: 'Hast du Beweise? Reiche eine Theorie ein.',
+      body: 'Trage zum Katalog bei. Nur überprüfbare Beweise — reine Textbehauptungen werden automatisch abgelehnt.',
+      button: 'Theorie einreichen',
+    },
+    joinRanks: {
+      title: 'Werde Mitglied und steige vom Rekrut zum General auf',
+      body: 'Verifizierte Experten erhalten Fachabzeichen und starten im Rang Leutnant.',
+      button: 'Konto erstellen',
+    },
   },
   card: {
     evidence: 'Beweise',
@@ -1272,6 +1311,7 @@ export const DE: Strings = {
     takedowns: 'Löschanfragen',
     support: 'Unterstützen',
     submit: 'Einreichen',
+    proposeCategory: 'Kategorie vorschlagen',
     version: 'v0.1 · Vorschau',
   },
 };

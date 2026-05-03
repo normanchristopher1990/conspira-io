@@ -74,17 +74,29 @@ export default function App() {
   );
 }
 
+const PROPOSE_CATEGORY_URL =
+  import.meta.env.VITE_PROPOSE_CATEGORY_URL ??
+  'mailto:hello@conspira.io?subject=Propose%20a%20category';
+
 function Footer() {
   const { t } = useI18n();
   return (
     <footer className="border-t border-line bg-white">
       <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted flex flex-wrap items-center justify-between gap-3">
         <span>{t.footer.copyright}</span>
-        <nav className="flex items-center gap-4">
+        <nav className="flex flex-wrap items-center gap-4">
           <Link to="/about" className="hover:text-ink">{t.footer.about}</Link>
           <Link to="/takedowns" className="hover:text-ink">{t.footer.takedowns}</Link>
           <Link to="/support" className="hover:text-ink">{t.footer.support}</Link>
           <Link to="/submit" className="hover:text-ink">{t.footer.submit}</Link>
+          <a
+            href={PROPOSE_CATEGORY_URL}
+            className="hover:text-ink"
+            target={PROPOSE_CATEGORY_URL.startsWith('mailto:') ? undefined : '_blank'}
+            rel={PROPOSE_CATEGORY_URL.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+          >
+            {t.footer.proposeCategory}
+          </a>
           <span className="font-mono-num">{t.footer.version}</span>
         </nav>
       </div>

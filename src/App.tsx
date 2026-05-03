@@ -1,4 +1,5 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import AuthRouteSync from './components/AuthRouteSync';
 import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import RequireAuth from './components/RequireAuth';
@@ -28,6 +29,7 @@ export default function App() {
     <I18nProvider>
       <AuthProvider>
         <BrowserRouter>
+        <AuthRouteSync />
         <div className="min-h-screen bg-bg flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <Header />
           <div className="flex-1">

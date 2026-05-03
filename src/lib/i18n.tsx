@@ -190,6 +190,8 @@ export const EN = {
     scoreFive: (n: number, max: number) =>
       `Score ${n}/5 · max ${max}/5 for this type`,
     uploadedFile: '↥ uploaded file',
+    stanceSupporting: 'Supporting',
+    stanceContradicting: 'Contradicting',
   },
   aiReview: {
     heading: 'Automated review',
@@ -354,6 +356,10 @@ export const EN = {
       uploadLabel: 'Or upload the file directly',
       descriptionLabel: 'Description',
       descriptionHint: 'What does it show? Why does it matter?',
+      stanceLabel: 'Stance',
+      stanceHint: 'Does this evidence support or contradict the theory?',
+      stanceSupporting: 'Supports the theory',
+      stanceContradicting: 'Contradicts the theory',
       involvementLegend: 'Your involvement',
       involvementIntro: 'Optional. Each declaration increases the evidential weight if verified. Knowingly false declarations result in a permanent ban.',
       directlyInvolved: 'I was directly involved in this',
@@ -812,6 +818,8 @@ export const DE: Strings = {
     scoreFive: (n: number, max: number) =>
       `Bewertung ${n}/5 · max ${max}/5 für diesen Typ`,
     uploadedFile: '↥ Hochgeladene Datei',
+    stanceSupporting: 'Unterstützend',
+    stanceContradicting: 'Widersprechend',
   },
   aiReview: {
     heading: 'Automatische Überprüfung',
@@ -976,6 +984,10 @@ export const DE: Strings = {
       uploadLabel: 'Oder direkt Datei hochladen',
       descriptionLabel: 'Beschreibung',
       descriptionHint: 'Was zeigt es? Warum ist es relevant?',
+      stanceLabel: 'Position',
+      stanceHint: 'Unterstützt oder widerspricht dieser Beweis der Theorie?',
+      stanceSupporting: 'Unterstützt die Theorie',
+      stanceContradicting: 'Widerspricht der Theorie',
       involvementLegend: 'Deine Beteiligung',
       involvementIntro: 'Optional. Jede Erklärung erhöht das Beweisgewicht bei Verifizierung. Falsche Erklärungen führen zu permanenter Sperrung.',
       directlyInvolved: 'Ich war direkt beteiligt',

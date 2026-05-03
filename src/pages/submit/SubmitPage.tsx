@@ -92,6 +92,7 @@ export default function SubmitPage() {
               url: e.url.trim() || null,
               storage_path: e.uploadedFile?.storage_path ?? null,
               description: e.description.trim(),
+              stance: e.stance,
               involvement: { ...e.involvement },
             })),
         );

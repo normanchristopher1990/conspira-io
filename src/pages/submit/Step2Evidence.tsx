@@ -1,6 +1,7 @@
 import Field from '../../components/form/Field';
 import FileUpload from '../../components/form/FileUpload';
 import { Checkbox, Select, TextInput, Textarea } from '../../components/form/inputs';
+import StancePicker from '../../components/form/StancePicker';
 import { EVIDENCE_TYPE_META } from '../../lib/evidenceTypes';
 import { useI18n, type Strings } from '../../lib/i18n';
 import type { EvidenceType } from '../../lib/types';
@@ -164,6 +165,10 @@ function EvidenceCard({
           value={item.description}
           onChange={(e) => onChange({ description: e.target.value })}
         />
+      </Field>
+
+      <Field label={t.submit.step2.stanceLabel} required hint={t.submit.step2.stanceHint}>
+        <StancePicker value={item.stance} onChange={(stance) => onChange({ stance })} />
       </Field>
 
       <fieldset className="rounded-lg border border-line p-4">

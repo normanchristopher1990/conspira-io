@@ -13,21 +13,14 @@ import { getCategory } from '../lib/categories';
 import { useAiReview, useComments, useEvidence, useTheory } from '../lib/hooks';
 import { useI18n, type Strings } from '../lib/i18n';
 import { localizeTheory } from '../lib/localize';
-import type { Evidence, EvidenceScore } from '../lib/types';
+import type { Evidence } from '../lib/types';
 
 type Tab = 'evidence' | 'discussion' | 'timeline';
-type EvidenceFilter = 'all' | 'positive' | 'neutral' | 'negative';
-
-function bucket(score: EvidenceScore): EvidenceFilter {
-  if (score === 0) return 'all';
-  if (score <= 2) return 'negative';
-  if (score === 3) return 'neutral';
-  return 'positive';
-}
+type EvidenceFilter = 'all' | 'supporting' | 'contradicting';
 
 function applyFilter(items: Evidence[], filter: EvidenceFilter): Evidence[] {
   if (filter === 'all') return items;
-  return items.filter((e) => bucket(e.score) === filter);
+  return items.filter((e) => e.stance === filter);
 }
 
 export default function TheoryDetailPage() {
@@ -283,22 +276,16 @@ function EvidencePane({
         <div className="flex flex-wrap items-center gap-1">
           <FilterPill active={filter === 'all'} onClick={() => setFilter('all')} label={t.detail.filterAll} />
           <FilterPill
-            active={filter === 'positive'}
-            onClick={() => setFilter('positive')}
+            active={filter === 'supporting'}
+            onClick={() => setFilter('supporting')}
             label={t.detail.filterSupporting}
-            dot="#1F8A4C"
+            dot="#16A34A"
           />
           <FilterPill
-            active={filter === 'neutral'}
-            onClick={() => setFilter('neutral')}
-            label={t.detail.filterNeutral}
-            dot="#9CA3AF"
-          />
-          <FilterPill
-            active={filter === 'negative'}
-            onClick={() => setFilter('negative')}
+            active={filter === 'contradicting'}
+            onClick={() => setFilter('contradicting')}
             label={t.detail.filterContradicting}
-            dot="#C0392B"
+            dot="#DC2626"
           />
         </div>
       </div>

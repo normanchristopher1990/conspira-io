@@ -45,6 +45,7 @@ type EvidenceRow = {
   storage_path: string | null;
   description: string;
   score: EvidenceScore;
+  stance: 'supporting' | 'contradicting';
   submitted_by: string;
   created_at: string;
 };
@@ -83,6 +84,7 @@ function rowToEvidence(row: EvidenceRow, usernamesById: Map<string, string>): Ev
     storagePath: row.storage_path,
     description: row.description,
     score: row.score,
+    stance: row.stance,
     submittedBy: usernamesById.get(row.submitted_by) ?? 'unknown',
     submittedAt: row.created_at,
   };
@@ -302,6 +304,7 @@ export type EvidenceInsert = {
   url: string | null;
   storage_path?: string | null;
   description: string;
+  stance: 'supporting' | 'contradicting';
   involvement: Record<string, unknown>;
 };
 

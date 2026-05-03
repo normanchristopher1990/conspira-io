@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Field from '../components/form/Field';
 import FileUpload from '../components/form/FileUpload';
 import { Checkbox, Select, TextInput, Textarea } from '../components/form/inputs';
+import StancePicker from '../components/form/StancePicker';
 import { addEvidence } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { EVIDENCE_TYPE_META } from '../lib/evidenceTypes';
@@ -110,6 +111,7 @@ export default function AddEvidencePage() {
         url: item.url.trim() || null,
         storage_path: item.uploadedFile?.storage_path ?? null,
         description: item.description.trim(),
+        stance: item.stance,
         involvement: { ...item.involvement },
       });
       navigate(`/theory/${id}`);
@@ -200,6 +202,13 @@ export default function AddEvidencePage() {
           <Textarea
             value={item.description}
             onChange={(e) => setItem({ ...item, description: e.target.value })}
+          />
+        </Field>
+
+        <Field label={t.submit.step2.stanceLabel} required hint={t.submit.step2.stanceHint}>
+          <StancePicker
+            value={item.stance}
+            onChange={(stance) => setItem({ ...item, stance })}
           />
         </Field>
 

@@ -1,7 +1,12 @@
-import type { Evidence } from '../lib/types';
+import type { Evidence, Stance } from '../lib/types';
 import { EVIDENCE_TYPE_META, evidenceColor } from '../lib/evidenceTypes';
-import { useI18n } from '../lib/i18n';
+import { useI18n, type Strings } from '../lib/i18n';
 import { publicUrlForStoragePath } from '../lib/storage';
+
+const STANCE_COLOR: Record<Stance, string> = {
+  supporting: '#16A34A',
+  contradicting: '#DC2626',
+};
 
 type Props = { evidence: Evidence };
 
@@ -39,6 +44,7 @@ export default function EvidenceRow({ evidence }: Props) {
             >
               {typeT.short}
             </span>
+            <StanceTag stance={evidence.stance} t={t} />
             <span className="text-[11px] font-mono-num text-muted">
               {t.evidenceType.ceilingMax(meta.ceiling)}
             </span>
@@ -91,5 +97,26 @@ export default function EvidenceRow({ evidence }: Props) {
         </div>
       </div>
     </li>
+  );
+}
+
+function StanceTag({ stance, t }: { stance: Stance; t: Strings }) {
+  const color = STANCE_COLOR[stance];
+  const label =
+    stance === 'supporting'
+      ? t.evidenceRow.stanceSupporting
+      : t.evidenceRow.stanceContradicting;
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1"
+      style={{ color, borderColor: `${color}55`, backgroundColor: `${color}0d` }}
+    >
+      <span
+        aria-hidden
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </span>
   );
 }

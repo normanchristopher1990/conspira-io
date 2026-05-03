@@ -183,6 +183,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         'Joint Senate hearing on 3 August 1977 documenting the program’s scope, including testing on civilians and prisoners.',
       score: 5,
+      stance: 'supporting',
       submittedBy: 'archivist_42',
       submittedAt: '2026-04-21T09:11:00Z',
     },
@@ -196,6 +197,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         '~20,000 pages of MKUltra subproject memos surviving the 1973 destruction order.',
       score: 4,
+      stance: 'supporting',
       submittedBy: 'archivist_42',
       submittedAt: '2026-04-21T09:11:00Z',
     },
@@ -209,6 +211,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         'Investigative monograph reconstructed from declassified files; cited extensively in subsequent scholarship.',
       score: 4,
+      stance: 'supporting',
       submittedBy: 'historica',
       submittedAt: '2026-04-22T10:00:00Z',
     },
@@ -224,6 +227,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         'Simultaneous shadow-angle measurements at distant latitudes consistently yield Earth circumference ≈ 40,000 km.',
       score: 1,
+      stance: 'contradicting',
       submittedBy: 'skeptic',
       submittedAt: '2026-03-22T19:42:00Z',
     },
@@ -237,6 +241,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         'Continuous independent observation since 2014 shows curved horizon and rotation consistent with an oblate spheroid.',
       score: 2,
+      stance: 'contradicting',
       submittedBy: 'skeptic',
       submittedAt: '2026-03-22T19:42:00Z',
     },
@@ -252,6 +257,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         'Multiple agencies split between zoonotic and lab-related origin; no consensus, low-to-moderate confidence on either.',
       score: 3,
+      stance: 'supporting',
       submittedBy: 'biosafety_l4',
       submittedAt: '2026-03-25T08:14:00Z',
     },
@@ -265,6 +271,7 @@ export const MOCK_EVIDENCE: Record<string, Evidence[]> = {
       description:
         'Interim staff report concluding lab-related incident is more likely than zoonotic spillover; criticised for selective sourcing.',
       score: 3,
+      stance: 'supporting',
       submittedBy: 'public_health_md',
       submittedAt: '2026-03-26T08:14:00Z',
     },

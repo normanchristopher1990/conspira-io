@@ -1,5 +1,5 @@
 import type { UploadedFile } from '../../lib/storage';
-import type { CategorySlug, EvidenceType } from '../../lib/types';
+import type { CategorySlug, EvidenceType, Stance } from '../../lib/types';
 
 export type Involvement = {
   directlyInvolved: boolean;
@@ -35,6 +35,7 @@ export type EvidenceDraft = {
   url: string;
   uploadedFile: UploadedFile | null;
   description: string;
+  stance: Stance;
   involvement: Involvement;
 };
 
@@ -47,6 +48,7 @@ export function emptyEvidence(): EvidenceDraft {
     url: '',
     uploadedFile: null,
     description: '',
+    stance: 'supporting',
     involvement: { ...emptyInvolvement },
   };
 }

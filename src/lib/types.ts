@@ -56,6 +56,7 @@ export type EvidenceType =
   | 'unverified';
 
 export type EvidenceScore = 0 | 1 | 2 | 3 | 4 | 5;
+export type Stance = 'supporting' | 'contradicting';
 
 export type Evidence = {
   id: string;
@@ -67,6 +68,7 @@ export type Evidence = {
   storagePath?: string | null;
   description: string;
   score: EvidenceScore;
+  stance: Stance;
   submittedBy: string;
   submittedAt: string; // ISO
 };

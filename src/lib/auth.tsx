@@ -27,6 +27,7 @@ type AuthContextValue = {
   signUpWithEmail: (email: string, password: string, username: string) => Promise<void>;
   signInWithOAuth: (provider: 'google' | 'apple') => Promise<void>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -37,6 +38,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   const isConfigured = supabase !== null;
+  const userId = session?.user?.id;
+
+  // Pull the latest profile row. Exposed via context so anything that
+  // changes the row (admin grants, edit-profile saves) can refresh it
+  // immediately without forcing a re-login.
+  const refreshProfile = useCallback(async () => {
+    if (!supabase || !userId) {
+      setProfile(null);
+      return;
+    }
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username, is_admin')
+      .eq('id', userId)
+      .maybeSingle();
+    setProfile((data as Profile | null) ?? null);
+  }, [userId]);
 
   useEffect(() => {
     if (!supabase) {
@@ -61,25 +79,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Load profile whenever the user changes.
+  // Initial profile load + reload whenever the user changes.
   useEffect(() => {
-    if (!supabase || !session?.user) {
-      setProfile(null);
-      return;
-    }
-    let cancelled = false;
-    supabase
-      .from('profiles')
-      .select('id, username, is_admin')
-      .eq('id', session.user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setProfile((data as Profile | null) ?? null);
-      });
+    void refreshProfile();
+  }, [refreshProfile]);
+
+  // Realtime: react to changes on the user's own profile row so admin
+  // grants/revokes propagate the moment they happen — no logout needed,
+  // no waiting for the next navigation. Best-effort: requires Realtime
+  // to be enabled on the `profiles` table in the Supabase dashboard.
+  useEffect(() => {
+    if (!supabase || !userId) return;
+    const channel = supabase
+      .channel(`profile:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${userId}`,
+        },
+        () => {
+          void refreshProfile();
+        },
+      )
+      .subscribe();
     return () => {
-      cancelled = true;
+      void supabase!.removeChannel(channel);
     };
-  }, [session?.user?.id, session?.user]);
+  }, [userId, refreshProfile]);
+
+  // Fallback: refresh when the tab regains focus. Catches the case
+  // where Realtime isn't enabled and the user changed in another tab
+  // / on another device while this tab was idle.
+  useEffect(() => {
+    if (!supabase || !userId) return;
+    const onFocus = () => {
+      void refreshProfile();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') onFocus();
+    });
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [userId, refreshProfile]);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
     if (!supabase) throw new Error('Supabase is not configured.');
@@ -96,7 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: { data: { username } },
       });
       if (error) {
-        // Surface friendlier messages for the trigger's exceptions.
         if (/Username already taken/i.test(error.message)) {
           throw new Error('That username is already taken — try another.');
         }
@@ -135,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUpWithEmail,
       signInWithOAuth,
       signOut,
+      refreshProfile,
     }),
     [
       ready,
@@ -145,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUpWithEmail,
       signInWithOAuth,
       signOut,
+      refreshProfile,
     ],
   );
 

@@ -22,7 +22,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-line">
       <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
-        <Link to="/" className="flex items-center gap-2 group min-w-0">
+        <Link to="/" className="flex items-center gap-2 group shrink-0 whitespace-nowrap">
           <span
             aria-hidden
             className="grid place-items-center h-7 w-7 rounded-md text-white font-bold text-sm shrink-0"
@@ -30,7 +30,7 @@ export default function Header() {
           >
             C
           </span>
-          <span className="font-semibold tracking-tight text-ink truncate">
+          <span className="font-semibold tracking-tight text-ink">
             Conspira
           </span>
           <span className="ml-2 hidden lg:inline text-[11px] font-mono-num uppercase tracking-widest text-muted">
@@ -48,7 +48,7 @@ export default function Header() {
           />
         </form>
 
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-1 shrink-0">
           <NavLink
             to="/"
             end

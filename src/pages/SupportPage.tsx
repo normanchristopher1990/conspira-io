@@ -15,10 +15,10 @@ export default function SupportPage() {
       <div className="pt-10">
         <p className="text-xs font-mono-num uppercase tracking-widest text-muted">Support</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">
-          Support Conspira.io
+          Support Conspira
         </h1>
         <p className="mt-3 text-base text-slate-600 leading-relaxed">
-          Conspira.io stays free and behind no paywall. To keep it that way and
+          Conspira stays free and behind no paywall. To keep it that way and
           keep ads selective and minimal, we accept voluntary support. Three
           ways:
         </p>

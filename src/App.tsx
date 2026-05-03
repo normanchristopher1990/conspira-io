@@ -71,7 +71,7 @@ function Footer() {
   return (
     <footer className="border-t border-line bg-white">
       <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted flex flex-wrap items-center justify-between gap-3">
-        <span>© Conspira.io — evidence-based catalogue</span>
+        <span>© Conspira — evidence-based catalogue</span>
         <nav className="flex items-center gap-4">
           <Link to="/about" className="hover:text-ink">About</Link>
           <Link to="/takedowns" className="hover:text-ink">Takedowns</Link>

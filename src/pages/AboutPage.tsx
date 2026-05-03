@@ -11,7 +11,7 @@ export default function AboutPage() {
           Evidence over opinion.
         </h1>
         <p className="mt-3 text-base text-slate-600 leading-relaxed">
-          Conspira.io is a scientific, evidence-based catalogue of alleged
+          Conspira is a scientific, evidence-based catalogue of alleged
           conspiracy theories. Every theory is scored on the weight of
           verifiable evidence — not opinion, not popularity, not community
           voting. Truth isn&apos;t a matter of opinion.

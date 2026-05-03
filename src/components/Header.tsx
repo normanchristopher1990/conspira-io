@@ -31,7 +31,7 @@ export default function Header() {
             C
           </span>
           <span className="font-semibold tracking-tight text-ink truncate">
-            Conspira<span className="text-brand">.io</span>
+            Conspira
           </span>
           <span className="ml-2 hidden lg:inline text-[11px] font-mono-num uppercase tracking-widest text-muted">
             Evidence first

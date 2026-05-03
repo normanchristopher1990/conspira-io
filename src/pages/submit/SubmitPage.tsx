@@ -78,7 +78,7 @@ export default function SubmitPage() {
       } else {
         // Local preview only — no Supabase or no signed-in user.
         // eslint-disable-next-line no-console
-        console.log('[Conspira.io] submission payload (local preview)', state);
+        console.log('[Conspira] submission payload (local preview)', state);
         await new Promise((r) => setTimeout(r, 400));
       }
       setPhase('submitted');

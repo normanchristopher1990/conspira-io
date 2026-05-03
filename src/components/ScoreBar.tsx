@@ -2,11 +2,19 @@ type Props = {
   score: number; // 1..9
 };
 
-function colorFor(score: number): string {
-  if (score <= 4) return '#EF4444';   // fire-red
-  if (score === 5) return '#EAB308';  // yellow
-  return '#16A34A';                   // green
-}
+// Each position has its own colour along the red → orange → yellow → green
+// spectrum. Only the active box ever displays it; the rest stay grey.
+const POSITION_COLOR: Record<number, string> = {
+  1: '#FF0000', // YouTube red
+  2: '#F45B2D', // red-orange
+  3: '#F97316', // orange
+  4: '#F59E0B', // amber / dark orange
+  5: '#EAB308', // yellow
+  6: '#84CC16', // lime
+  7: '#22C55E', // green
+  8: '#16A34A', // dark-medium green
+  9: '#15803D', // deep green
+};
 
 function labelFor(score: number): string {
   if (score <= 2) return 'Almost certainly false';
@@ -18,7 +26,7 @@ function labelFor(score: number): string {
 
 export default function ScoreBar({ score }: Props) {
   const clamped = Math.max(1, Math.min(9, Math.round(score)));
-  const accent = colorFor(clamped);
+  const accent = POSITION_COLOR[clamped];
 
   return (
     <div className="w-full">

@@ -72,9 +72,7 @@ export default function HomePage() {
           Evidence over opinion.
         </h1>
         <p className="mt-2 max-w-2xl text-sm sm:text-base text-slate-600">
-          A scientific catalogue of conspiracy theories — each one scored
-          1&nbsp;to&nbsp;9 by the weight of independently verifiable evidence,
-          not by votes or popularity.
+          They said you can&apos;t handle the truth. We disagree.
         </p>
       </section>
 

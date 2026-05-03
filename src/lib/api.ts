@@ -26,6 +26,7 @@ type TheoryRow = {
   score: number;
   evidence_count: number;
   independent_sources: number;
+  view_count: number | null;
   submitted_by: string;
   created_at: string;
 };
@@ -57,6 +58,7 @@ function rowToTheory(row: TheoryRow, usernamesById: Map<string, string>): Theory
     score: row.score,
     evidenceCount: row.evidence_count,
     independentSources: row.independent_sources,
+    viewCount: row.view_count ?? 0,
     submittedBy: usernamesById.get(row.submitted_by) ?? 'unknown',
     submittedAt: row.created_at,
   };
@@ -527,6 +529,11 @@ export async function getAiReview(theoryId: string): Promise<AiReview | null> {
     .maybeSingle();
   if (error || !data) return null;
   return (data.ai_review as AiReview | null) ?? null;
+}
+
+export async function incrementViews(theoryId: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.rpc('increment_theory_views', { theory_id: theoryId });
 }
 
 export async function triggerReview(theoryId: string): Promise<void> {

@@ -30,6 +30,7 @@ export type Theory = {
   score: number; // 1..9
   evidenceCount: number;
   independentSources: number;
+  viewCount?: number;
   youtubeId: string | null;
   status: TheoryStatus;
   submittedBy: string;

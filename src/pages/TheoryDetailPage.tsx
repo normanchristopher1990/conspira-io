@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AiReviewPanel from '../components/AiReviewPanel';
 import CategoryBanner from '../components/CategoryBanner';
@@ -7,7 +7,7 @@ import EvidenceRow from '../components/EvidenceRow';
 import ScoreBar from '../components/ScoreBar';
 import TimelineSection from '../components/TimelineSection';
 import YouTubeEmbed from '../components/YouTubeEmbed';
-import { deleteTheory } from '../lib/api';
+import { deleteTheory, incrementViews } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { getCategory } from '../lib/categories';
 import { useAiReview, useComments, useEvidence, useTheory } from '../lib/hooks';
@@ -47,6 +47,11 @@ export default function TheoryDetailPage() {
     () => applyFilter(allEvidence ?? [], filter),
     [allEvidence, filter],
   );
+
+  // Bump the view counter once when the theory loads.
+  useEffect(() => {
+    if (id) void incrementViews(id);
+  }, [id]);
 
   async function handleDelete() {
     if (!theory) return;

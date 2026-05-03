@@ -6,13 +6,10 @@ import YouTubeThumbnail from './YouTubeThumbnail';
 
 type Props = { theory: Theory };
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+function formatCount(n: number): string {
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}k`;
+  return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
 export default function TheoryCard({ theory }: Props) {
@@ -43,29 +40,56 @@ export default function TheoryCard({ theory }: Props) {
             <ScoreBar score={theory.score} />
           </div>
 
-          <div className="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs text-muted">
-            <div className="flex items-center gap-3">
-              <span className="font-mono-num">
-                {theory.evidenceCount} evidence
+          <div className="mt-4 flex items-center gap-4 text-xs text-muted">
+            <span className="inline-flex items-center gap-1.5">
+              <DocIcon />
+              <span className="font-mono-num text-slate-700">
+                {theory.evidenceCount}
               </span>
-              <span aria-hidden>·</span>
-              <span className="font-mono-num">
-                {theory.independentSources} sources
+              <span>evidence</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <EyeIcon />
+              <span className="font-mono-num text-slate-700">
+                {formatCount(theory.viewCount ?? 0)}
               </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link
-                to={`/u/${theory.submittedBy}`}
-                className="text-slate-500 hover:text-brand"
-              >
-                @{theory.submittedBy}
-              </Link>
-              <span aria-hidden>·</span>
-              <span className="font-mono-num">{formatDate(theory.submittedAt)}</span>
-            </div>
+              <span>views</span>
+            </span>
           </div>
         </div>
       </div>
     </article>
+  );
+}
+
+function DocIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className="h-3.5 w-3.5 text-slate-400"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <path d="M3.5 2.5h6L12.5 5.5v8h-9z" strokeLinejoin="round" />
+      <path d="M9.5 2.5v3h3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className="h-3.5 w-3.5 text-slate-400"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <path d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8z" />
+      <circle cx="8" cy="8" r="2" />
+    </svg>
   );
 }

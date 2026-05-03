@@ -425,6 +425,99 @@ export type AiReview = {
   reviewed_at: string;
 };
 
+// ---------- Comments ----------
+
+export type CommentAuthor = {
+  id: string;
+  username: string;
+  rank: PublicProfile['rank'];
+  expert_level: PublicProfile['expert_level'];
+  badges: string[];
+  accepted_count: number;
+  is_admin: boolean;
+};
+
+export type Comment = {
+  id: string;
+  theoryId: string;
+  body: string;
+  createdAt: string;
+  author: CommentAuthor;
+};
+
+type CommentRow = {
+  id: string;
+  theory_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+async function fetchAuthors(ids: string[]): Promise<Map<string, CommentAuthor>> {
+  const map = new Map<string, CommentAuthor>();
+  if (!supabase || ids.length === 0) return map;
+  const unique = Array.from(new Set(ids));
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, username, rank, expert_level, badges, accepted_count, is_admin')
+    .in('id', unique);
+  for (const row of (data ?? []) as CommentAuthor[]) {
+    map.set(row.id, row);
+  }
+  return map;
+}
+
+const UNKNOWN_AUTHOR: Omit<CommentAuthor, 'id'> = {
+  username: 'unknown',
+  rank: 'rekrut',
+  expert_level: 'none',
+  badges: [],
+  accepted_count: 0,
+  is_admin: false,
+};
+
+export async function listComments(theoryId: string): Promise<Comment[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('comments')
+    .select('*')
+    .eq('theory_id', theoryId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  const rows = (data ?? []) as CommentRow[];
+  const authors = await fetchAuthors(rows.map((r) => r.author_id));
+  return rows.map((r) => ({
+    id: r.id,
+    theoryId: r.theory_id,
+    body: r.body,
+    createdAt: r.created_at,
+    author: authors.get(r.author_id) ?? { id: r.author_id, ...UNKNOWN_AUTHOR },
+  }));
+}
+
+export async function addComment(
+  authorId: string,
+  theoryId: string,
+  body: string,
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const trimmed = body.trim();
+  if (trimmed.length === 0) throw new Error('Comment cannot be empty');
+  if (trimmed.length > 2000) throw new Error('Comment is too long (max 2000 chars)');
+  const { error } = await supabase.from('comments').insert({
+    author_id: authorId,
+    theory_id: theoryId,
+    body: trimmed,
+  });
+  if (error) throw error;
+}
+
+export async function deleteComment(id: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { error } = await supabase.from('comments').delete().eq('id', id);
+  if (error) throw error;
+}
+
 export async function getAiReview(theoryId: string): Promise<AiReview | null> {
   if (!supabase) return null;
   const { data, error } = await supabase

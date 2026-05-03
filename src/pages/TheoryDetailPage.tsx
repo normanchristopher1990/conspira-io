@@ -2,15 +2,18 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AiReviewPanel from '../components/AiReviewPanel';
 import CategoryBanner from '../components/CategoryBanner';
+import CommentsSection from '../components/CommentsSection';
 import EvidenceRow from '../components/EvidenceRow';
 import ScoreBar from '../components/ScoreBar';
+import TimelineSection from '../components/TimelineSection';
 import YouTubeEmbed from '../components/YouTubeEmbed';
 import { deleteTheory } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { getCategory } from '../lib/categories';
-import { useAiReview, useEvidence, useTheory } from '../lib/hooks';
+import { useAiReview, useComments, useEvidence, useTheory } from '../lib/hooks';
 import type { Evidence, EvidenceScore } from '../lib/types';
 
+type Tab = 'evidence' | 'discussion' | 'timeline';
 type EvidenceFilter = 'all' | 'positive' | 'neutral' | 'negative';
 
 function bucket(score: EvidenceScore): EvidenceFilter {
@@ -30,12 +33,20 @@ export default function TheoryDetailPage() {
   const { data: theory, loading, error } = useTheory(id);
   const { data: allEvidence } = useEvidence(id);
   const { data: aiReview } = useAiReview(id);
+  const { data: comments } = useComments(id);
   const { profile: meProfile, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const [tab, setTab] = useState<Tab>('evidence');
   const [filter, setFilter] = useState<EvidenceFilter>('all');
   const [confirmDel, setConfirmDel] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const evidence = useMemo(
+    () => applyFilter(allEvidence ?? [], filter),
+    [allEvidence, filter],
+  );
 
   async function handleDelete() {
     if (!theory) return;
@@ -49,11 +60,6 @@ export default function TheoryDetailPage() {
       setDeleting(false);
     }
   }
-
-  const evidence = useMemo(
-    () => applyFilter(allEvidence ?? [], filter),
-    [allEvidence, filter],
-  );
 
   if (error) {
     return (
@@ -86,6 +92,8 @@ export default function TheoryDetailPage() {
   }
 
   const cat = getCategory(theory.category);
+  const evidenceCount = (allEvidence ?? []).length;
+  const commentCount = (comments ?? []).length;
 
   return (
     <main className="mx-auto max-w-4xl px-4 pb-16">
@@ -205,60 +213,123 @@ export default function TheoryDetailPage() {
 
       <AiReviewPanel review={aiReview} />
 
-      <section className="mt-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold tracking-tight text-ink">
-            Evidence{' '}
-            <span className="text-muted font-normal">
-              ({(allEvidence ?? []).length})
-            </span>
-          </h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to={`/theory/${id}/add-evidence`}
-              className="inline-flex items-center gap-1 rounded-md border border-line bg-white px-3 py-1 text-xs font-medium text-brand hover:border-brand"
-            >
-              + Add evidence
-            </Link>
-          </div>
-          <div className="flex flex-wrap items-center gap-1">
-            <FilterPill active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
-            <FilterPill
-              active={filter === 'positive'}
-              onClick={() => setFilter('positive')}
-              label="Supporting"
-              dot="#1F8A4C"
-            />
-            <FilterPill
-              active={filter === 'neutral'}
-              onClick={() => setFilter('neutral')}
-              label="Neutral"
-              dot="#9CA3AF"
-            />
-            <FilterPill
-              active={filter === 'negative'}
-              onClick={() => setFilter('negative')}
-              label="Contradicting"
-              dot="#C0392B"
-            />
-          </div>
-        </div>
+      <nav className="mt-8 flex items-center gap-1 border-b border-line overflow-x-auto scroll-hide">
+        <TabButton active={tab === 'evidence'} onClick={() => setTab('evidence')}>
+          Evidence{' '}
+          <span className="ml-1 text-muted font-normal">({evidenceCount})</span>
+        </TabButton>
+        <TabButton active={tab === 'discussion'} onClick={() => setTab('discussion')}>
+          Discussion{' '}
+          <span className="ml-1 text-muted font-normal">({commentCount})</span>
+        </TabButton>
+        <TabButton active={tab === 'timeline'} onClick={() => setTab('timeline')}>
+          Timeline
+        </TabButton>
+      </nav>
 
-        {evidence.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
-            {(allEvidence ?? []).length === 0
-              ? 'No evidence has been catalogued for this theory yet.'
-              : 'No evidence matches the selected filter.'}
-          </div>
-        ) : (
-          <ul className="mt-4 space-y-3">
-            {evidence.map((e) => (
-              <EvidenceRow key={e.id} evidence={e} />
-            ))}
-          </ul>
+      <div className="mt-6">
+        {tab === 'evidence' && (
+          <EvidencePane
+            theoryId={theory.id}
+            allEvidence={allEvidence ?? []}
+            evidence={evidence}
+            filter={filter}
+            setFilter={setFilter}
+          />
         )}
-      </section>
+        {tab === 'discussion' && <CommentsSection theoryId={theory.id} />}
+        {tab === 'timeline' && <TimelineSection evidence={allEvidence ?? []} />}
+      </div>
     </main>
+  );
+}
+
+function EvidencePane({
+  theoryId,
+  allEvidence,
+  evidence,
+  filter,
+  setFilter,
+}: {
+  theoryId: string;
+  allEvidence: Evidence[];
+  evidence: Evidence[];
+  filter: EvidenceFilter;
+  setFilter: (f: EvidenceFilter) => void;
+}) {
+  return (
+    <section>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/theory/${theoryId}/add-evidence`}
+            className="inline-flex items-center gap-1 rounded-md border border-line bg-white px-3 py-1 text-xs font-medium text-brand hover:border-brand"
+          >
+            + Add evidence
+          </Link>
+        </div>
+        <div className="flex flex-wrap items-center gap-1">
+          <FilterPill active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
+          <FilterPill
+            active={filter === 'positive'}
+            onClick={() => setFilter('positive')}
+            label="Supporting"
+            dot="#1F8A4C"
+          />
+          <FilterPill
+            active={filter === 'neutral'}
+            onClick={() => setFilter('neutral')}
+            label="Neutral"
+            dot="#9CA3AF"
+          />
+          <FilterPill
+            active={filter === 'negative'}
+            onClick={() => setFilter('negative')}
+            label="Contradicting"
+            dot="#C0392B"
+          />
+        </div>
+      </div>
+
+      {evidence.length === 0 ? (
+        <div className="mt-4 rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
+          {allEvidence.length === 0
+            ? 'No evidence has been catalogued for this theory yet.'
+            : 'No evidence matches the selected filter.'}
+        </div>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {evidence.map((e) => (
+            <EvidenceRow key={e.id} evidence={e} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        'relative -mb-px shrink-0 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ' +
+        (active
+          ? 'text-ink border-brand'
+          : 'text-muted hover:text-ink border-transparent')
+      }
+    >
+      {children}
+    </button>
   );
 }
 

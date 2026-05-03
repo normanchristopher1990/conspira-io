@@ -3,6 +3,7 @@ import {
   getAiReview,
   getProfileByUsername,
   listAllProfiles,
+  listComments,
   listEvidence,
   listTakedownsAdmin,
   listTakedownsPublic,
@@ -11,6 +12,7 @@ import {
   getTheory,
   listPendingTheories,
   type AiReview,
+  type Comment,
   type PublicProfile,
   type Takedown,
 } from './api';
@@ -103,6 +105,13 @@ export function useTakedownsAdmin(): AsyncState<Takedown[]> {
 
 export function useAllProfiles(): AsyncState<PublicProfile[]> {
   return useAsync(listAllProfiles, []);
+}
+
+export function useComments(theoryId: string | undefined): AsyncState<Comment[]> {
+  return useAsync(
+    () => (theoryId ? listComments(theoryId) : Promise.resolve([])),
+    [theoryId],
+  );
 }
 
 // Subscribe to Postgres changes on a table; calls onChange with a small

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import type { Theory } from '../lib/types';
 import CategoryBanner from './CategoryBanner';
 import ScoreBar from './ScoreBar';
-import YouTubeEmbed from './YouTubeEmbed';
+import YouTubeThumbnail from './YouTubeThumbnail';
 
 type Props = { theory: Theory };
 
@@ -22,7 +22,7 @@ export default function TheoryCard({ theory }: Props) {
 
       <div className="p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
         <div className="min-w-0">
-          <YouTubeEmbed videoId={theory.youtubeId} title={theory.title} />
+          <YouTubeThumbnail videoId={theory.youtubeId} title={theory.title} />
         </div>
 
         <div className="min-w-0 flex flex-col">

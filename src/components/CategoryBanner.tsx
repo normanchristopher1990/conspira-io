@@ -7,7 +7,7 @@ export default function CategoryBanner({ category }: Props) {
   const cat = getCategory(category);
   return (
     <div
-      className="h-[70px] w-full relative overflow-hidden"
+      className="h-[52px] w-full relative overflow-hidden"
       style={{
         background: `linear-gradient(110deg, ${cat.hue} 0%, ${cat.hue}CC 60%, #185FA5 140%)`,
       }}

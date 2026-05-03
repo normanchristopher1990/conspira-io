@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import EvidenceRow from './EvidenceRow';
-import { EVIDENCE_TYPE_META } from '../lib/evidenceTypes';
+import { useI18n } from '../lib/i18n';
 import type { Evidence } from '../lib/types';
 
 type Props = { evidence: Evidence[] };
@@ -8,6 +8,7 @@ type Props = { evidence: Evidence[] };
 // Chronological story of how the evidence accumulated.
 // Oldest first — the order things became publicly known.
 export default function TimelineSection({ evidence }: Props) {
+  const { t } = useI18n();
   const sorted = useMemo(
     () =>
       [...evidence].sort(
@@ -19,7 +20,7 @@ export default function TimelineSection({ evidence }: Props) {
   if (sorted.length === 0) {
     return (
       <p className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
-        No evidence has been catalogued for this theory yet.
+        {t.detail.noEvidenceYet}
       </p>
     );
   }
@@ -37,7 +38,7 @@ export default function TimelineSection({ evidence }: Props) {
             </span>
             <span aria-hidden className="h-px flex-1 bg-line" />
             <span className="text-[11px] text-muted">
-              {items.length} {items.length === 1 ? 'item' : 'items'}
+              {t.timeline.items(items.length)}
             </span>
           </header>
           <ol className="relative ml-3 space-y-3 border-l border-line pl-5">
@@ -53,7 +54,7 @@ export default function TimelineSection({ evidence }: Props) {
                     month: 'short',
                     day: 'numeric',
                   })}{' '}
-                  · {EVIDENCE_TYPE_META[e.type].short}
+                  · {t.evidenceType[e.type].short}
                 </p>
                 <EvidenceRow evidence={e} />
               </li>

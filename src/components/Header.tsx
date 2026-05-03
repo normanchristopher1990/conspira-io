@@ -1,8 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { useI18n } from '../lib/i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
   const { user, profile, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   async function handleSignOut() {
@@ -13,10 +16,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-line">
       <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
-        {/* Logo — slightly larger on mobile (where it stands alone) */}
         <Link
           to="/"
-          aria-label="Conspira home"
+          aria-label={t.header.conspiraHome}
           className="flex items-center gap-2 group shrink-0 whitespace-nowrap"
         >
           <span
@@ -31,11 +33,11 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* Right side — account */}
         <div className="flex items-center gap-2 shrink-0">
+          <LanguageSwitcher />
+
           {user ? (
             <>
-              {/* Desktop: username + sign out */}
               <Link
                 to="/me"
                 className="hidden sm:inline text-xs text-muted hover:text-brand"
@@ -47,13 +49,12 @@ export default function Header() {
                 onClick={handleSignOut}
                 className="hidden sm:inline text-xs text-slate-700 hover:text-ink px-2 py-1.5 rounded-md hover:bg-slate-100"
               >
-                Sign out
+                {t.header.signOut}
               </button>
 
-              {/* Mobile: account avatar (links to profile) */}
               <Link
                 to="/me"
-                aria-label="Your profile"
+                aria-label={t.header.yourProfile}
                 className="sm:hidden grid place-items-center h-9 w-9 rounded-full bg-brand text-white text-sm font-semibold hover:bg-brand-600"
               >
                 {(profile?.username ?? 'u').charAt(0).toUpperCase()}
@@ -61,18 +62,16 @@ export default function Header() {
             </>
           ) : (
             <>
-              {/* Desktop: text Sign in */}
               <Link
                 to="/login"
                 className="hidden sm:inline text-sm text-slate-700 hover:text-ink px-3 py-1.5 rounded-md hover:bg-slate-100"
               >
-                Sign in
+                {t.header.signIn}
               </Link>
 
-              {/* Mobile: account icon → login */}
               <Link
                 to="/login"
-                aria-label="Sign in"
+                aria-label={t.header.signIn}
                 className="sm:hidden grid place-items-center h-9 w-9 rounded-full text-slate-600 hover:bg-slate-100"
               >
                 <PersonIcon />

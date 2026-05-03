@@ -3,11 +3,13 @@ import CategoryFilter from '../components/CategoryFilter';
 import SortBar from '../components/SortBar';
 import TheoryCard from '../components/TheoryCard';
 import { listTheoriesPage } from '../lib/api';
+import { useI18n } from '../lib/i18n';
 import type { CategorySlug, SortKey, Theory } from '../lib/types';
 
 const PAGE_SIZE = 12;
 
 export default function HomePage() {
+  const { t } = useI18n();
   const [category, setCategory] = useState<CategorySlug | 'all'>('all');
   const [sort, setSort] = useState<SortKey>('newest');
   const [items, setItems] = useState<Theory[]>([]);
@@ -69,10 +71,10 @@ export default function HomePage() {
     <main className="mx-auto max-w-6xl px-4 pb-16">
       <section className="pt-8 pb-6">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink">
-          Evidence over opinion.
+          {t.hero.title}
         </h1>
         <p className="mt-2 max-w-2xl text-sm sm:text-base text-slate-600">
-          They said you can&apos;t handle the truth. We disagree.
+          {t.hero.subtitle}
         </p>
       </section>
 
@@ -83,15 +85,26 @@ export default function HomePage() {
 
       <section className="mt-6 grid gap-5">
         {error ? (
-          <ErrorState message={error} />
+          <div className="rounded-xl border border-score-bad/30 bg-score-bad/5 p-6 text-sm text-score-bad">
+            {t.home.failedToLoad(error)}
+          </div>
         ) : loadingInitial ? (
-          <SkeletonList />
+          <>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-56 rounded-xl bg-white ring-1 ring-line shadow-card animate-pulse"
+              />
+            ))}
+          </>
         ) : items.length === 0 ? (
-          <EmptyState />
+          <div className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
+            {t.home.empty}
+          </div>
         ) : (
           <>
-            {items.map((t) => (
-              <TheoryCard key={t.id} theory={t} />
+            {items.map((th) => (
+              <TheoryCard key={th.id} theory={th} />
             ))}
             {hasMore && (
               <div className="flex justify-center pt-2">
@@ -101,7 +114,7 @@ export default function HomePage() {
                   disabled={loadingMore}
                   className="rounded-md border border-line bg-white px-5 py-2 text-sm font-medium text-ink hover:border-slate-300 disabled:opacity-60"
                 >
-                  {loadingMore ? 'Loading…' : `Load more · ${total - items.length} remaining`}
+                  {loadingMore ? t.home.loadingMore : t.home.loadMore(total - items.length)}
                 </button>
               </div>
             )}
@@ -109,34 +122,5 @@ export default function HomePage() {
         )}
       </section>
     </main>
-  );
-}
-
-function SkeletonList() {
-  return (
-    <>
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div
-          key={i}
-          className="h-56 rounded-xl bg-white ring-1 ring-line shadow-card animate-pulse"
-        />
-      ))}
-    </>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
-      No theories in this category yet.
-    </div>
-  );
-}
-
-function ErrorState({ message }: { message: string }) {
-  return (
-    <div className="rounded-xl border border-score-bad/30 bg-score-bad/5 p-6 text-sm text-score-bad">
-      Failed to load theories: {message}
-    </div>
   );
 }

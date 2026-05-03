@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '../../lib/auth';
+import { useI18n } from '../../lib/i18n';
 import { deleteEvidenceFile, uploadEvidenceFile, type UploadedFile } from '../../lib/storage';
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 
 export default function FileUpload({ value, onChange, disabled }: Props) {
   const { user, isConfigured } = useAuth();
+  const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function FileUpload({ value, onChange, disabled }: Props) {
     if (!file) return;
     setError(null);
     if (!user) {
-      setError('Sign in to upload files.');
+      setError(t.fileUpload.signInPrompt);
       return;
     }
     setUploading(true);
@@ -32,7 +34,7 @@ export default function FileUpload({ value, onChange, disabled }: Props) {
       const uploaded = await uploadEvidenceFile(user.id, file);
       onChange(uploaded);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed.');
+      setError(err instanceof Error ? err.message : t.fileUpload.failed);
     } finally {
       setUploading(false);
     }
@@ -48,7 +50,7 @@ export default function FileUpload({ value, onChange, disabled }: Props) {
   if (!isConfigured) {
     return (
       <div className="rounded-md border border-dashed border-line bg-slate-50 px-3 py-3 text-xs text-muted">
-        File uploads require Supabase to be configured.
+        {t.fileUpload.notConfigured}
       </div>
     );
   }
@@ -69,7 +71,7 @@ export default function FileUpload({ value, onChange, disabled }: Props) {
             rel="noopener noreferrer"
             className="text-xs text-brand hover:underline"
           >
-            Preview
+            {t.fileUpload.preview}
           </a>
           <button
             type="button"
@@ -77,7 +79,7 @@ export default function FileUpload({ value, onChange, disabled }: Props) {
             className="text-xs text-score-bad hover:underline"
             disabled={disabled}
           >
-            Remove
+            {t.fileUpload.remove}
           </button>
         </div>
       </div>
@@ -92,11 +94,9 @@ export default function FileUpload({ value, onChange, disabled }: Props) {
         disabled={disabled || uploading || !user}
         className="w-full rounded-md border border-dashed border-line bg-white px-3 py-3 text-sm font-medium text-brand hover:border-brand hover:bg-brand/5 disabled:opacity-50"
       >
-        {uploading ? 'Uploading…' : !user ? 'Sign in to upload a file' : '↥ Upload a file'}
+        {uploading ? t.fileUpload.uploading : !user ? t.fileUpload.signInPrompt : t.fileUpload.uploadButton}
       </button>
-      <p className="mt-1 text-[11px] text-muted">
-        PDFs, images, video, audio, plain text — up to 20 MB.
-      </p>
+      <p className="mt-1 text-[11px] text-muted">{t.fileUpload.helperHint}</p>
       {error && <p className="mt-1 text-xs text-score-bad">{error}</p>}
       <input
         ref={inputRef}

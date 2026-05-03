@@ -1,16 +1,18 @@
 import { NavLink } from 'react-router-dom';
+import { useI18n } from '../lib/i18n';
 
 export default function BottomNav() {
+  const { t } = useI18n();
   return (
     <nav
       aria-label="Primary"
       className="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white/95 backdrop-blur border-t border-line pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="grid grid-cols-4">
-        <NavItem to="/" end label="Home" icon={<HomeIcon />} />
-        <NavItem to="/search" label="Search" icon={<SearchIcon />} />
-        <NavItem to="/submit" label="Submit" icon={<PlusIcon />} />
-        <NavItem to="/me" label="Profile" icon={<PersonIcon />} />
+        <NavItem to="/" end label={t.nav.home} icon={<HomeIcon />} />
+        <NavItem to="/search" label={t.nav.search} icon={<SearchIcon />} />
+        <NavItem to="/submit" label={t.nav.submit} icon={<PlusIcon />} />
+        <NavItem to="/me" label={t.nav.profile} icon={<PersonIcon />} />
       </ul>
     </nav>
   );

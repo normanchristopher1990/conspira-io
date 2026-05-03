@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { addComment, deleteComment, type Comment } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useComments, useRealtimeTable } from '../lib/hooks';
+import { useI18n, type Strings } from '../lib/i18n';
 import {
   deriveRank,
   rankBadgeClasses,
@@ -16,6 +17,7 @@ const MAX = 2000;
 
 export default function CommentsSection({ theoryId }: Props) {
   const { user, profile, isAdmin } = useAuth();
+  const { t } = useI18n();
   const { data, loading, error, refetch } = useComments(theoryId);
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
@@ -32,7 +34,7 @@ export default function CommentsSection({ theoryId }: Props) {
       await addComment(user.id, theoryId, body);
       setBody('');
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to post comment.');
+      setSubmitError(err instanceof Error ? err.message : t.comments.failed);
     } finally {
       setBusy(false);
     }
@@ -54,11 +56,11 @@ export default function CommentsSection({ theoryId }: Props) {
     <section>
       <header className="flex items-baseline justify-between gap-3 flex-wrap">
         <h2 className="text-lg font-semibold tracking-tight text-ink">
-          Discussion{' '}
+          {t.comments.heading}{' '}
           <span className="text-muted font-normal">({comments.length})</span>
         </h2>
         <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-900 ring-1 ring-amber-200">
-          Discussion — does not affect score
+          {t.comments.disclaimer}
         </span>
       </header>
 
@@ -66,15 +68,15 @@ export default function CommentsSection({ theoryId }: Props) {
         {user ? (
           <form onSubmit={submit}>
             <p className="text-xs text-muted">
-              Commenting as{' '}
+              {t.comments.commentingAs}{' '}
               <Link to="/me" className="font-medium text-ink hover:text-brand">
-                {profile?.username ?? 'you'}
+                {profile?.username ?? '…'}
               </Link>
             </p>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value.slice(0, MAX))}
-              placeholder="Add to the discussion…"
+              placeholder={t.comments.placeholder}
               className="mt-2 w-full min-h-[88px] resize-y rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/50"
               disabled={busy}
             />
@@ -87,7 +89,7 @@ export default function CommentsSection({ theoryId }: Props) {
                 disabled={busy || body.trim().length === 0}
                 className="rounded-md bg-brand px-4 py-1.5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60"
               >
-                {busy ? 'Posting…' : 'Post comment'}
+                {busy ? t.comments.posting : t.comments.post}
               </button>
             </div>
             {submitError && (
@@ -102,30 +104,28 @@ export default function CommentsSection({ theoryId }: Props) {
               to={`/login?next=/theory/${theoryId}`}
               className="font-medium text-brand hover:underline"
             >
-              Log in
+              {t.comments.signInPrompt.logIn}
             </Link>{' '}
-            or{' '}
+            {t.comments.signInPrompt.or}{' '}
             <Link
               to={`/register?next=/theory/${theoryId}`}
               className="font-medium text-brand hover:underline"
             >
-              create an account
+              {t.comments.signInPrompt.register}
             </Link>{' '}
-            to join the discussion.
+            {t.comments.signInPrompt.tail}
           </p>
         )}
       </div>
 
       <div className="mt-4">
         {error ? (
-          <p className="text-sm text-score-bad">
-            Failed to load comments: {error.message}
-          </p>
+          <p className="text-sm text-score-bad">{t.comments.loadingFailed(error.message)}</p>
         ) : loading ? (
-          <p className="text-sm text-muted">Loading discussion…</p>
+          <p className="text-sm text-muted">{t.comments.loading}</p>
         ) : comments.length === 0 ? (
           <p className="rounded-xl border border-dashed border-line p-8 text-center text-sm text-muted">
-            No comments yet. Start the discussion.
+            {t.comments.empty}
           </p>
         ) : (
           <ul className="space-y-3">
@@ -135,6 +135,7 @@ export default function CommentsSection({ theoryId }: Props) {
                 comment={c}
                 canDelete={user?.id === c.author.id || isAdmin}
                 onDelete={() => remove(c.id)}
+                t={t}
               />
             ))}
           </ul>
@@ -148,16 +149,19 @@ function CommentRow({
   comment,
   canDelete,
   onDelete,
+  t,
 }: {
   comment: Comment;
   canDelete: boolean;
   onDelete: () => void;
+  t: Strings;
 }) {
-  const rank = deriveRank(
+  const baseRank = deriveRank(
     comment.author.accepted_count,
     comment.author.expert_level as ExpertLevel,
     comment.author.rank as RankSlug,
   );
+  const rankT = t.rank[baseRank.slug];
   const [confirm, setConfirm] = useState(false);
 
   return (
@@ -173,14 +177,14 @@ function CommentRow({
           <span
             className={
               'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ' +
-              rankBadgeClasses(rank.style)
+              rankBadgeClasses(baseRank.style)
             }
-            title={rank.notes}
+            title={rankT.notes}
           >
-            {rank.label}
+            {rankT.label}
           </span>
           {comment.author.is_admin && (
-            <span className="text-[10px] font-mono-num text-brand">admin</span>
+            <span className="text-[10px] font-mono-num text-brand">{t.comments.admin}</span>
           )}
         </div>
         <time
@@ -188,7 +192,7 @@ function CommentRow({
           className="text-xs font-mono-num text-muted"
           title={new Date(comment.createdAt).toLocaleString()}
         >
-          {formatRelative(comment.createdAt)}
+          {formatRelative(comment.createdAt, t)}
         </time>
       </header>
       <p className="mt-2 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
@@ -198,18 +202,18 @@ function CommentRow({
         <div className="mt-2 flex justify-end">
           {confirm ? (
             <span className="flex items-center gap-2">
-              <span className="text-xs text-score-bad">Delete?</span>
+              <span className="text-xs text-score-bad">{t.comments.deleteQ}</span>
               <button
                 onClick={onDelete}
                 className="text-xs font-semibold text-score-bad hover:underline"
               >
-                Yes
+                {t.comments.yes}
               </button>
               <button
                 onClick={() => setConfirm(false)}
                 className="text-xs text-muted hover:text-ink"
               >
-                Cancel
+                {t.comments.cancel}
               </button>
             </span>
           ) : (
@@ -217,7 +221,7 @@ function CommentRow({
               onClick={() => setConfirm(true)}
               className="text-xs text-muted hover:text-score-bad"
             >
-              Delete
+              {t.comments.delete}
             </button>
           )}
         </div>
@@ -226,13 +230,13 @@ function CommentRow({
   );
 }
 
-function formatRelative(iso: string): string {
+function formatRelative(iso: string, t: Strings): string {
   const then = new Date(iso).getTime();
   const diff = (Date.now() - then) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 60) return t.comments.justNow;
+  if (diff < 3600) return t.comments.minutesAgo(Math.floor(diff / 60));
+  if (diff < 86400) return t.comments.hoursAgo(Math.floor(diff / 3600));
+  if (diff < 86400 * 7) return t.comments.daysAgo(Math.floor(diff / 86400));
   return new Date(iso).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',

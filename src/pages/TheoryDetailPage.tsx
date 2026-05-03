@@ -11,6 +11,7 @@ import { deleteTheory, incrementViews } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { getCategory } from '../lib/categories';
 import { useAiReview, useComments, useEvidence, useTheory } from '../lib/hooks';
+import { useI18n, type Strings } from '../lib/i18n';
 import type { Evidence, EvidenceScore } from '../lib/types';
 
 type Tab = 'evidence' | 'discussion' | 'timeline';
@@ -35,6 +36,7 @@ export default function TheoryDetailPage() {
   const { data: aiReview } = useAiReview(id);
   const { data: comments } = useComments(id);
   const { profile: meProfile, isAdmin } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState<Tab>('evidence');
@@ -61,7 +63,7 @@ export default function TheoryDetailPage() {
       await deleteTheory(theory.id);
       navigate('/');
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Delete failed.');
+      setDeleteError(err instanceof Error ? err.message : t.detail.deleteFailed);
       setDeleting(false);
     }
   }
@@ -69,9 +71,9 @@ export default function TheoryDetailPage() {
   if (error) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <p className="text-sm text-score-bad">Failed to load theory: {error.message}</p>
+        <p className="text-sm text-score-bad">{t.detail.failedToLoad(error.message)}</p>
         <Link to="/" className="mt-3 inline-block text-sm font-medium text-brand hover:underline">
-          ← Back to homepage
+          {t.detail.backHome}
         </Link>
       </main>
     );
@@ -88,9 +90,9 @@ export default function TheoryDetailPage() {
   if (!theory) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <p className="text-sm text-muted">Theory not found.</p>
+        <p className="text-sm text-muted">{t.detail.notFound}</p>
         <Link to="/" className="mt-3 inline-block text-sm font-medium text-brand hover:underline">
-          ← Back to homepage
+          {t.detail.backHome}
         </Link>
       </main>
     );
@@ -104,7 +106,7 @@ export default function TheoryDetailPage() {
     <main className="mx-auto max-w-4xl px-4 pb-16">
       <div className="pt-4 flex items-center justify-between gap-3 flex-wrap">
         <Link to="/" className="text-xs font-medium text-muted hover:text-brand">
-          ← Back to feed
+          {t.detail.backToFeed}
         </Link>
         <div className="flex items-center gap-3">
           {meProfile?.username === theory.submittedBy && (
@@ -112,7 +114,7 @@ export default function TheoryDetailPage() {
               to={`/theory/${theory.id}/edit`}
               className="text-xs font-medium text-brand hover:underline"
             >
-              Edit theory
+              {t.detail.editTheory}
             </Link>
           )}
           {((meProfile?.username === theory.submittedBy && theory.status !== 'accepted') ||
@@ -120,7 +122,7 @@ export default function TheoryDetailPage() {
             (confirmDel ? (
               <span className="inline-flex items-center gap-2">
                 <span className="text-xs font-medium text-score-bad">
-                  Delete permanently?
+                  {t.detail.deleteConfirm}
                 </span>
                 <button
                   type="button"
@@ -128,7 +130,7 @@ export default function TheoryDetailPage() {
                   disabled={deleting}
                   className="rounded-md bg-score-bad px-2.5 py-1 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
                 >
-                  {deleting ? 'Deleting…' : 'Yes, delete'}
+                  {deleting ? t.detail.deleting : t.detail.yesDelete}
                 </button>
                 <button
                   type="button"
@@ -136,7 +138,7 @@ export default function TheoryDetailPage() {
                   disabled={deleting}
                   className="text-xs text-muted hover:text-ink"
                 >
-                  Cancel
+                  {t.detail.cancel}
                 </button>
               </span>
             ) : (
@@ -145,14 +147,14 @@ export default function TheoryDetailPage() {
                 onClick={() => setConfirmDel(true)}
                 className="text-xs font-medium text-score-bad hover:underline"
               >
-                Delete theory
+                {t.detail.deleteTheory}
               </button>
             ))}
           <Link
             to={`/takedowns/new?theory=${theory.id}`}
             className="text-xs font-medium text-muted hover:text-score-bad"
           >
-            Request takedown
+            {t.detail.requestTakedown}
           </Link>
         </div>
       </div>
@@ -175,7 +177,7 @@ export default function TheoryDetailPage() {
               style={{ backgroundColor: cat.hue }}
               aria-hidden
             />
-            {cat.label}
+            {t.category[cat.slug]}
           </span>
 
           <h1 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
@@ -192,18 +194,18 @@ export default function TheoryDetailPage() {
             </div>
             <div className="rounded-lg ring-1 ring-line bg-slate-50 p-4">
               <h2 className="text-xs uppercase tracking-widest text-muted">
-                Theory score
+                {t.detail.theoryScore}
               </h2>
               <div className="mt-3">
                 <ScoreBar score={theory.score} />
               </div>
 
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                <Stat label="Evidence" value={`${theory.evidenceCount}`} />
-                <Stat label="Independent sources" value={`${theory.independentSources}`} />
-                <Stat label="Submitted by" value={theory.submittedBy} mono={false} />
+                <Stat label={t.detail.evidence} value={`${theory.evidenceCount}`} />
+                <Stat label={t.detail.sources} value={`${theory.independentSources}`} />
+                <Stat label={t.detail.submittedBy} value={theory.submittedBy} mono={false} />
                 <Stat
-                  label="Submitted"
+                  label={t.detail.submitted}
                   value={new Date(theory.submittedAt).toLocaleDateString(undefined, {
                     year: 'numeric',
                     month: 'short',
@@ -220,15 +222,15 @@ export default function TheoryDetailPage() {
 
       <nav className="mt-8 flex items-center gap-1 border-b border-line overflow-x-auto scroll-hide">
         <TabButton active={tab === 'evidence'} onClick={() => setTab('evidence')}>
-          Evidence{' '}
+          {t.detail.tabEvidence}{' '}
           <span className="ml-1 text-muted font-normal">({evidenceCount})</span>
         </TabButton>
         <TabButton active={tab === 'discussion'} onClick={() => setTab('discussion')}>
-          Discussion{' '}
+          {t.detail.tabDiscussion}{' '}
           <span className="ml-1 text-muted font-normal">({commentCount})</span>
         </TabButton>
         <TabButton active={tab === 'timeline'} onClick={() => setTab('timeline')}>
-          Timeline
+          {t.detail.tabTimeline}
         </TabButton>
       </nav>
 
@@ -240,6 +242,7 @@ export default function TheoryDetailPage() {
             evidence={evidence}
             filter={filter}
             setFilter={setFilter}
+            t={t}
           />
         )}
         {tab === 'discussion' && <CommentsSection theoryId={theory.id} />}
@@ -255,12 +258,14 @@ function EvidencePane({
   evidence,
   filter,
   setFilter,
+  t,
 }: {
   theoryId: string;
   allEvidence: Evidence[];
   evidence: Evidence[];
   filter: EvidenceFilter;
   setFilter: (f: EvidenceFilter) => void;
+  t: Strings;
 }) {
   return (
     <section>
@@ -270,27 +275,27 @@ function EvidencePane({
             to={`/theory/${theoryId}/add-evidence`}
             className="inline-flex items-center gap-1 rounded-md border border-line bg-white px-3 py-1 text-xs font-medium text-brand hover:border-brand"
           >
-            + Add evidence
+            {t.detail.addEvidence}
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-1">
-          <FilterPill active={filter === 'all'} onClick={() => setFilter('all')} label="All" />
+          <FilterPill active={filter === 'all'} onClick={() => setFilter('all')} label={t.detail.filterAll} />
           <FilterPill
             active={filter === 'positive'}
             onClick={() => setFilter('positive')}
-            label="Supporting"
+            label={t.detail.filterSupporting}
             dot="#1F8A4C"
           />
           <FilterPill
             active={filter === 'neutral'}
             onClick={() => setFilter('neutral')}
-            label="Neutral"
+            label={t.detail.filterNeutral}
             dot="#9CA3AF"
           />
           <FilterPill
             active={filter === 'negative'}
             onClick={() => setFilter('negative')}
-            label="Contradicting"
+            label={t.detail.filterContradicting}
             dot="#C0392B"
           />
         </div>
@@ -298,9 +303,7 @@ function EvidencePane({
 
       {evidence.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
-          {allEvidence.length === 0
-            ? 'No evidence has been catalogued for this theory yet.'
-            : 'No evidence matches the selected filter.'}
+          {allEvidence.length === 0 ? t.detail.noEvidenceYet : t.detail.noEvidenceMatch}
         </div>
       ) : (
         <ul className="mt-4 space-y-3">

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { searchTheories } from '../lib/api';
+import { useI18n } from '../lib/i18n';
 import type { Theory } from '../lib/types';
 
 export default function SearchPage() {
+  const { t } = useI18n();
   const [params, setParams] = useSearchParams();
   const initial = params.get('q') ?? '';
   const [query, setQuery] = useState(initial);
@@ -12,7 +14,6 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Run search when the URL param changes (header input updates the URL).
   useEffect(() => {
     const q = params.get('q') ?? '';
     setQuery(q);
@@ -28,7 +29,7 @@ export default function SearchPage() {
         if (!cancelled) setResults(items);
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Search failed.');
+        if (!cancelled) setError(e instanceof Error ? e.message : t.search.failed);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -36,7 +37,7 @@ export default function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [params]);
+  }, [params, t.search.failed]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,15 +48,15 @@ export default function SearchPage() {
     <main className="mx-auto max-w-6xl px-4 pb-16">
       <div className="pt-8">
         <Link to="/" className="text-xs font-medium text-muted hover:text-brand">
-          ← Back to feed
+          {t.search.backToFeed}
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">Search</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">{t.search.title}</h1>
         <form onSubmit={submit} className="mt-4 flex items-center gap-2">
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder='e.g. "lab leak" OR mkultra'
+            placeholder={t.search.placeholder}
             className="flex-1 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30"
             autoFocus
           />
@@ -63,13 +64,10 @@ export default function SearchPage() {
             type="submit"
             className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
           >
-            Search
+            {t.search.submit}
           </button>
         </form>
-        <p className="mt-2 text-xs text-muted">
-          Supports natural-language queries: quoted phrases, <code>OR</code>, and{' '}
-          <code>-exclusions</code>.
-        </p>
+        <p className="mt-2 text-xs text-muted">{t.search.helper}</p>
       </div>
 
       <section className="mt-8 grid gap-5">
@@ -78,21 +76,21 @@ export default function SearchPage() {
             {error}
           </div>
         ) : loading ? (
-          <p className="text-sm text-muted">Searching…</p>
+          <p className="text-sm text-muted">{t.search.searching}</p>
         ) : !query.trim() ? (
-          <p className="text-sm text-muted">Enter a query above.</p>
+          <p className="text-sm text-muted">{t.search.enterQuery}</p>
         ) : results.length === 0 ? (
           <p className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
-            No theories match &ldquo;{query}&rdquo;.
+            {t.search.noResults(query)}
           </p>
         ) : (
           <>
             <p className="text-xs text-muted">
               <span className="font-mono-num text-ink">{results.length}</span>{' '}
-              {results.length === 1 ? 'result' : 'results'}
+              {t.search.resultCount(results.length).replace(/^\d+\s+/, '')}
             </p>
-            {results.map((t) => (
-              <TheoryCard key={t.id} theory={t} />
+            {results.map((th) => (
+              <TheoryCard key={th.id} theory={th} />
             ))}
           </>
         )}

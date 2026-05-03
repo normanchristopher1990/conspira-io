@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useI18n } from '../lib/i18n';
 import type { Theory } from '../lib/types';
 import CategoryBanner from './CategoryBanner';
 import ScoreBar from './ScoreBar';
@@ -13,6 +14,7 @@ function formatCount(n: number): string {
 }
 
 export default function TheoryCard({ theory }: Props) {
+  const { t } = useI18n();
   return (
     <article className="group bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden transition-shadow hover:shadow-md">
       <CategoryBanner category={theory.category} />
@@ -46,14 +48,14 @@ export default function TheoryCard({ theory }: Props) {
               <span className="font-mono-num text-slate-700">
                 {theory.evidenceCount}
               </span>
-              <span>evidence</span>
+              <span>{t.card.evidence}</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
               <EyeIcon />
               <span className="font-mono-num text-slate-700">
                 {formatCount(theory.viewCount ?? 0)}
               </span>
-              <span>views</span>
+              <span>{t.card.views}</span>
             </span>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { deleteTheory, updateTheory } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { CATEGORIES } from '../lib/categories';
 import { useTheory } from '../lib/hooks';
+import { useI18n } from '../lib/i18n';
 import { parseYoutubeId } from '../lib/youtube';
 import type { CategorySlug } from '../lib/types';
 import { SUMMARY_MAX } from './submit/wizardState';
@@ -14,6 +15,7 @@ import { SUMMARY_MAX } from './submit/wizardState';
 export default function EditTheoryPage() {
   const { id } = useParams<{ id: string }>();
   const { user, profile: meProfile, isConfigured } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { data: theory, loading } = useTheory(id);
 
@@ -36,7 +38,7 @@ export default function EditTheoryPage() {
   if (!isConfigured) {
     return (
       <main className="mx-auto max-w-xl px-4 py-16 text-center text-sm text-muted">
-        Editing requires Supabase to be configured.
+        {t.editTheory.needsSupabase}
       </main>
     );
   }
@@ -45,19 +47,18 @@ export default function EditTheoryPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-12 text-sm text-muted">
-        Loading…
+        {t.editTheory.loading}
       </main>
     );
   }
   if (!theory) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center text-sm text-muted">
-        Theory not found.
+        {t.editTheory.notFound}
       </main>
     );
   }
 
-  // RLS will block non-owners at the DB level too. Gate the UI by username.
   const isOwner = meProfile?.username === theory.submittedBy;
   if (meProfile && !isOwner) {
     return <Navigate to={`/theory/${id}`} replace />;
@@ -67,10 +68,10 @@ export default function EditTheoryPage() {
   const ytShowError = youtubeUrl.trim().length > 0 && !ytId;
 
   function validate(): string | null {
-    if (title.trim().length < 6) return 'Title must be at least 6 characters.';
-    if (!category) return 'Pick a category.';
-    if (summary.trim().length < 30) return 'Summary should be at least 30 characters.';
-    if (summary.length > SUMMARY_MAX) return `Summary must be ${SUMMARY_MAX} characters or fewer.`;
+    if (title.trim().length < 6) return t.submit.validation.titleMin;
+    if (!category) return t.submit.validation.categoryRequired;
+    if (summary.trim().length < 30) return t.submit.validation.summaryMin;
+    if (summary.length > SUMMARY_MAX) return t.submit.validation.summaryMax(SUMMARY_MAX);
     return null;
   }
 
@@ -89,7 +90,7 @@ export default function EditTheoryPage() {
       });
       navigate(`/theory/${id}`);
     } catch (e2) {
-      setError(e2 instanceof Error ? e2.message : 'Update failed.');
+      setError(e2 instanceof Error ? e2.message : t.detail.deleteFailed);
       setBusy(false);
     }
   }
@@ -101,7 +102,7 @@ export default function EditTheoryPage() {
       await deleteTheory(id!);
       navigate('/');
     } catch (e2) {
-      setError(e2 instanceof Error ? e2.message : 'Delete failed.');
+      setError(e2 instanceof Error ? e2.message : t.detail.deleteFailed);
       setBusy(false);
     }
   }
@@ -110,33 +111,37 @@ export default function EditTheoryPage() {
     <main className="mx-auto max-w-2xl px-4 pb-16">
       <div className="pt-6">
         <Link to={`/theory/${id}`} className="text-xs font-medium text-muted hover:text-brand">
-          ← Back to theory
+          {t.editTheory.backToTheory}
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">
-          Edit theory
+          {t.editTheory.title}
         </h1>
       </div>
 
       <form onSubmit={save} className="mt-6 space-y-5 rounded-xl ring-1 ring-line bg-white p-5">
-        <Field label="Title" required>
+        <Field label={t.submit.step1.titleLabel} required>
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} required />
         </Field>
 
-        <Field label="Category" required>
+        <Field label={t.submit.step1.categoryLabel} required>
           <Select
             value={category}
             onChange={(e) => setCategory(e.target.value as CategorySlug)}
           >
-            <option value="">— select —</option>
+            <option value="">{t.submit.step1.categoryPlaceholder}</option>
             {CATEGORIES.map((c) => (
               <option key={c.slug} value={c.slug}>
-                {c.label}
+                {t.category[c.slug]}
               </option>
             ))}
           </Select>
         </Field>
 
-        <Field label="Summary" required hint={`${summary.length} / ${SUMMARY_MAX}`}>
+        <Field
+          label={t.submit.step1.summaryLabel}
+          required
+          hint={`${summary.length} / ${SUMMARY_MAX}`}
+        >
           <Textarea
             value={summary}
             onChange={(e) => setSummary(e.target.value.slice(0, SUMMARY_MAX))}
@@ -144,38 +149,38 @@ export default function EditTheoryPage() {
         </Field>
 
         <Field
-          label="YouTube link"
-          hint="Optional"
-          error={ytShowError ? "That doesn't look like a valid YouTube URL." : undefined}
+          label={t.submit.step1.youtubeLabel}
+          hint={t.submit.step1.youtubeHint}
+          error={ytShowError ? t.submit.step1.youtubeError : undefined}
         >
           <TextInput value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} />
         </Field>
 
         {ytId && (
           <div className="rounded-lg ring-1 ring-line bg-slate-50 p-3">
-            <p className="text-[11px] uppercase tracking-widest text-muted mb-2">Preview</p>
-            <YouTubeEmbed videoId={ytId} title="Preview" />
+            <p className="text-[11px] uppercase tracking-widest text-muted mb-2">
+              {t.submit.step1.preview}
+            </p>
+            <YouTubeEmbed videoId={ytId} title={t.submit.step1.preview} />
           </div>
         )}
 
         {error && (
-          <p className="rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">
-            {error}
-          </p>
+          <p className="rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">{error}</p>
         )}
 
         <div className="flex items-center justify-between gap-3 pt-2">
           {theory.status === 'accepted' ? (
             <span
               className="text-xs text-muted"
-              title="Accepted theories can't be deleted by the owner — file a takedown request instead."
+              title={t.editTheory.deleteUnavailable}
             >
-              Delete unavailable —{' '}
+              {t.editTheory.deleteUnavailable}{' '}
               <Link
                 to={`/takedowns/new?theory=${id}`}
                 className="text-brand hover:underline"
               >
-                file a takedown
+                {t.editTheory.fileTakedown}
               </Link>
             </span>
           ) : !confirmDel ? (
@@ -185,18 +190,20 @@ export default function EditTheoryPage() {
               disabled={busy}
               className="text-sm font-medium text-score-bad hover:underline"
             >
-              Delete theory
+              {t.editTheory.deleteTheory}
             </button>
           ) : (
             <span className="flex items-center gap-2">
-              <span className="text-xs text-score-bad font-medium">Permanently delete?</span>
+              <span className="text-xs text-score-bad font-medium">
+                {t.editTheory.deleteConfirm}
+              </span>
               <button
                 type="button"
                 onClick={remove}
                 disabled={busy}
                 className="rounded-md bg-score-bad px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
               >
-                Yes, delete
+                {t.editTheory.yesDelete}
               </button>
               <button
                 type="button"
@@ -204,21 +211,21 @@ export default function EditTheoryPage() {
                 disabled={busy}
                 className="text-xs text-muted hover:text-ink"
               >
-                Cancel
+                {t.editTheory.cancel}
               </button>
             </span>
           )}
 
           <div className="flex items-center gap-3">
             <Link to={`/theory/${id}`} className="text-sm text-slate-600 hover:text-ink">
-              Cancel
+              {t.editTheory.cancel}
             </Link>
             <button
               type="submit"
               disabled={busy}
               className="rounded-md bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60"
             >
-              {busy ? 'Saving…' : 'Save changes'}
+              {busy ? t.editTheory.saving : t.editTheory.save}
             </button>
           </div>
         </div>

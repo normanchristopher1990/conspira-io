@@ -1,73 +1,64 @@
 import { Link } from 'react-router-dom';
+import { useI18n } from '../lib/i18n';
 
-// Configure these once you have accounts set up.
-// Set them via Vite env vars (VITE_PATREON_URL, VITE_DONATE_URL, VITE_SUBSCRIBE_URL)
-// or just edit the literals below.
 const PATREON_URL = import.meta.env.VITE_PATREON_URL ?? '';
 const DONATE_URL = import.meta.env.VITE_DONATE_URL ?? '';
 const SUBSCRIBE_URL = import.meta.env.VITE_SUBSCRIBE_URL ?? '';
 
 export default function SupportPage() {
+  const { t } = useI18n();
   const anyConfigured = PATREON_URL || DONATE_URL || SUBSCRIBE_URL;
 
   return (
     <main className="mx-auto max-w-3xl px-4 pb-16">
       <div className="pt-10">
-        <p className="text-xs font-mono-num uppercase tracking-widest text-muted">Support</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">
-          Support Conspira
-        </h1>
-        <p className="mt-3 text-base text-slate-600 leading-relaxed">
-          Conspira stays free and behind no paywall. To keep it that way and
-          keep ads selective and minimal, we accept voluntary support. Three
-          ways:
-        </p>
+        <p className="text-xs font-mono-num uppercase tracking-widest text-muted">{t.support.eyebrow}</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">{t.support.title}</h1>
+        <p className="mt-3 text-base text-slate-600 leading-relaxed">{t.support.intro}</p>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Tier
-          title="One-time donation"
-          desc="Small or large — every contribution covers hosting and AI review costs."
-          cta="Donate"
+          title={t.support.tiers.donate.title}
+          desc={t.support.tiers.donate.desc}
+          cta={t.support.tiers.donate.cta}
+          notConfigured={t.support.notConfigured}
           url={DONATE_URL}
         />
         <Tier
-          title="Patreon"
-          desc="Monthly support. Recurring contributions help us plan."
-          cta="Become a patron"
+          title={t.support.tiers.patreon.title}
+          desc={t.support.tiers.patreon.desc}
+          cta={t.support.tiers.patreon.cta}
+          notConfigured={t.support.notConfigured}
           url={PATREON_URL}
         />
         <Tier
-          title="Subscription"
-          desc="Ad-free experience and early access to new theories. Coming with Phase 3."
-          cta="Subscribe"
+          title={t.support.tiers.subscribe.title}
+          desc={t.support.tiers.subscribe.desc}
+          cta={t.support.tiers.subscribe.cta}
+          notConfigured={t.support.notConfigured}
           url={SUBSCRIBE_URL}
         />
       </div>
 
       {!anyConfigured && (
         <p className="mt-8 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-          Owner note — set <code>VITE_PATREON_URL</code>, <code>VITE_DONATE_URL</code>,
-          and/or <code>VITE_SUBSCRIBE_URL</code> in <code>.env.local</code> to
-          activate the buttons.
+          Owner note — set <code>VITE_PATREON_URL</code>, <code>VITE_DONATE_URL</code>, and/or{' '}
+          <code>VITE_SUBSCRIBE_URL</code> in <code>.env.local</code> to activate the buttons.
         </p>
       )}
 
       <section className="mt-10 rounded-xl ring-1 ring-line bg-white p-5 text-sm text-slate-700">
-        <h2 className="text-base font-semibold text-ink">Where the money goes</h2>
+        <h2 className="text-base font-semibold text-ink">{t.support.where.title}</h2>
         <ul className="mt-3 space-y-1">
-          <li>· Server hosting (Vercel + Supabase)</li>
-          <li>· Anthropic API usage for the automated review pass</li>
-          <li>· Storage for uploaded evidence files</li>
-          <li>· Domain renewal</li>
-          <li>· No salary — this is a volunteer project</li>
+          {t.support.where.list.map((line, i) => (
+            <li key={i}>{line}</li>
+          ))}
         </ul>
         <p className="mt-3 text-xs text-muted">
-          Per the concept doc&apos;s monetisation policy: no pharma, no
-          government, and no weapons advertisers will be accepted on this
-          platform.{' '}
+          {t.support.where.footer}{' '}
           <Link to="/about" className="text-brand hover:underline">
-            About
+            {t.support.where.aboutLink}
           </Link>
         </p>
       </section>
@@ -79,11 +70,13 @@ function Tier({
   title,
   desc,
   cta,
+  notConfigured,
   url,
 }: {
   title: string;
   desc: string;
   cta: string;
+  notConfigured: string;
   url: string;
 }) {
   return (
@@ -101,7 +94,7 @@ function Tier({
         </a>
       ) : (
         <span className="mt-4 inline-flex justify-center rounded-md border border-dashed border-line bg-slate-50 px-4 py-2 text-sm text-muted">
-          Not configured yet
+          {notConfigured}
         </span>
       )}
     </div>

@@ -4,10 +4,12 @@ import Field from '../components/form/Field';
 import { Checkbox, TextInput, Textarea } from '../components/form/inputs';
 import { getProfileById, updateMyProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { useI18n } from '../lib/i18n';
 import { EXPERT_BADGES } from '../lib/ranks';
 
 export default function ProfileEditPage() {
   const { user, isConfigured, profile: meBasic } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
@@ -39,7 +41,7 @@ export default function ProfileEditPage() {
   if (!isConfigured) {
     return (
       <main className="mx-auto max-w-xl px-4 py-16 text-center text-sm text-muted">
-        Profile editing requires Supabase to be configured.
+        {t.profileEdit.needsSupabase}
       </main>
     );
   }
@@ -60,10 +62,10 @@ export default function ProfileEditPage() {
     e.preventDefault();
     setError(null);
     if (username.trim().length < 3) {
-      return setError('Username must be at least 3 characters.');
+      return setError(t.profileEdit.usernameMin);
     }
     if (!/^[a-z0-9_]+$/i.test(username.trim())) {
-      return setError('Username must be alphanumeric or underscores only.');
+      return setError(t.profileEdit.invalidUsername);
     }
     setBusy(true);
     try {
@@ -76,7 +78,7 @@ export default function ProfileEditPage() {
       });
       navigate('/me');
     } catch (e2) {
-      setError(e2 instanceof Error ? e2.message : 'Update failed.');
+      setError(e2 instanceof Error ? e2.message : t.profileEdit.updateFailed);
       setBusy(false);
     }
   }
@@ -84,7 +86,7 @@ export default function ProfileEditPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-12 text-sm text-muted">
-        Loading profile…
+        {t.profile.loading}
       </main>
     );
   }
@@ -93,20 +95,18 @@ export default function ProfileEditPage() {
     <main className="mx-auto max-w-2xl px-4 pb-16">
       <div className="pt-6">
         <Link to="/me" className="text-xs font-medium text-muted hover:text-brand">
-          ← Back to profile
+          {t.profileEdit.backToProfile}
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-ink">
-          Edit profile
+          {t.profileEdit.title}
         </h1>
         {meBasic && (
-          <p className="mt-1 text-xs text-muted">
-            Signed in as {meBasic.username}
-          </p>
+          <p className="mt-1 text-xs text-muted">{t.profileEdit.signedInAs(meBasic.username)}</p>
         )}
       </div>
 
       <form onSubmit={submit} className="mt-6 space-y-5 rounded-xl ring-1 ring-line bg-white p-5">
-        <Field label="Username" required hint="Letters, numbers, underscores">
+        <Field label={t.profileEdit.username} required hint={t.profileEdit.usernameHint}>
           <TextInput
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -115,7 +115,7 @@ export default function ProfileEditPage() {
           />
         </Field>
 
-        <Field label="Real name" hint="Optional · increases evidential weight when verified">
+        <Field label={t.profileEdit.realName} hint={t.profileEdit.realNameHint}>
           <TextInput
             value={realName}
             onChange={(e) => setRealName(e.target.value)}
@@ -123,7 +123,7 @@ export default function ProfileEditPage() {
           />
         </Field>
 
-        <Field label="Field of expertise" hint="Optional">
+        <Field label={t.profileEdit.expertField} hint={t.profileEdit.expertFieldHint}>
           <TextInput
             value={expertField}
             onChange={(e) => setExpertField(e.target.value)}
@@ -132,8 +132,8 @@ export default function ProfileEditPage() {
         </Field>
 
         <Field
-          label="Credential note"
-          hint="Public · used by admins to verify your expert status"
+          label={t.profileEdit.credentialNote}
+          hint={t.profileEdit.credentialNoteHint}
         >
           <Textarea
             value={expertNote}
@@ -143,38 +143,37 @@ export default function ProfileEditPage() {
         </Field>
 
         <div>
-          <p className="text-sm font-medium text-ink">Domain badges</p>
-          <p className="text-xs text-muted">
-            Pick the badges that match your expertise. Verified experts get coloured/glowing variants.
-          </p>
+          <p className="text-sm font-medium text-ink">{t.profileEdit.badgesTitle}</p>
+          <p className="text-xs text-muted">{t.profileEdit.badgesIntro}</p>
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {Object.entries(EXPERT_BADGES).map(([slug, meta]) => (
-              <Checkbox
-                key={slug}
-                label={`${meta.emoji}  ${meta.label}`}
-                checked={badges.has(slug)}
-                onChange={() => toggleBadge(slug)}
-              />
-            ))}
+            {Object.entries(EXPERT_BADGES).map(([slug, meta]) => {
+              const label = (t.expertBadge as Record<string, string>)[slug] ?? meta.label;
+              return (
+                <Checkbox
+                  key={slug}
+                  label={`${meta.emoji}  ${label}`}
+                  checked={badges.has(slug)}
+                  onChange={() => toggleBadge(slug)}
+                />
+              );
+            })}
           </div>
         </div>
 
         {error && (
-          <p className="rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">
-            {error}
-          </p>
+          <p className="rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">{error}</p>
         )}
 
         <div className="flex items-center justify-end gap-3">
           <Link to="/me" className="text-sm text-slate-600 hover:text-ink">
-            Cancel
+            {t.profileEdit.cancel}
           </Link>
           <button
             type="submit"
             disabled={busy}
             className="rounded-md bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60"
           >
-            {busy ? 'Saving…' : 'Save changes'}
+            {busy ? t.profileEdit.saving : t.profileEdit.save}
           </button>
         </div>
       </form>

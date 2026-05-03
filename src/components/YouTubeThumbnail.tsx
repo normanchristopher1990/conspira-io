@@ -1,3 +1,5 @@
+import { useI18n } from '../lib/i18n';
+
 type Props = {
   videoId: string | null;
   title: string;
@@ -7,10 +9,11 @@ type Props = {
 // would otherwise mount one player per card and stutter on mobile.
 // The whole thumbnail is the link; the play button is purely visual.
 export default function YouTubeThumbnail({ videoId, title }: Props) {
+  const { t } = useI18n();
   if (!videoId) {
     return (
       <div className="aspect-video w-full rounded-md bg-slate-100 ring-1 ring-line flex items-center justify-center text-xs text-muted">
-        No video attached
+        {t.card.noVideo}
       </div>
     );
   }
@@ -24,7 +27,7 @@ export default function YouTubeThumbnail({ videoId, title }: Props) {
       href={watchUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Watch "${title}" on YouTube (opens in a new tab)`}
+      aria-label={t.card.youtubeAria(title)}
       className="group relative block aspect-video w-full overflow-hidden rounded-md bg-black ring-1 ring-line touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
     >
       <img

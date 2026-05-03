@@ -1,24 +1,27 @@
 import type { AiReview } from '../lib/api';
+import { useI18n } from '../lib/i18n';
 
 type Props = { review: AiReview | null };
 
-const THEMATIC_LABEL: Record<AiReview['thematic'], { label: string; color: string }> = {
-  supporting: { label: 'Neutral evidence leans supporting', color: '#1F8A4C' },
-  contradicting: { label: 'Neutral evidence leans contradicting', color: '#C0392B' },
-  mixed: { label: 'No clear directional alignment', color: '#9CA3AF' },
-  neutral: { label: 'Insufficient neutral evidence to call', color: '#9CA3AF' },
+const THEMATIC_COLOR: Record<AiReview['thematic'], string> = {
+  supporting: '#1F8A4C',
+  contradicting: '#C0392B',
+  mixed: '#9CA3AF',
+  neutral: '#9CA3AF',
 };
 
 export default function AiReviewPanel({ review }: Props) {
+  const { t } = useI18n();
   if (!review) return null;
-  const t = THEMATIC_LABEL[review.thematic];
+  const themeColor = THEMATIC_COLOR[review.thematic];
+  const themeLabel = t.aiReview.thematic[review.thematic];
 
   return (
     <section className="mt-6 rounded-xl ring-1 ring-line bg-white p-5">
       <header className="flex items-baseline justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted">
-            Automated review
+            {t.aiReview.heading}
           </h2>
           <span className="text-[11px] font-mono-num text-muted">
             {review.model}
@@ -32,7 +35,7 @@ export default function AiReviewPanel({ review }: Props) {
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4 items-baseline">
         <div>
           <p className="text-[11px] uppercase tracking-widest text-muted">
-            Suggested score
+            {t.aiReview.suggestedScore}
           </p>
           <p className="font-mono-num text-3xl font-bold text-ink">
             {review.suggested_score}
@@ -41,15 +44,15 @@ export default function AiReviewPanel({ review }: Props) {
         </div>
         <div>
           <p className="text-[11px] uppercase tracking-widest text-muted">
-            Thematic alignment
+            {t.aiReview.thematicAlignment}
           </p>
           <p className="mt-1 inline-flex items-center gap-1.5 text-sm">
             <span
               aria-hidden
               className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: t.color }}
+              style={{ backgroundColor: themeColor }}
             />
-            <span style={{ color: t.color }}>{t.label}</span>
+            <span style={{ color: themeColor }}>{themeLabel}</span>
           </p>
           {review.thematic_analysis && (
             <p className="mt-2 text-sm text-slate-600 leading-relaxed">
@@ -62,7 +65,7 @@ export default function AiReviewPanel({ review }: Props) {
       {review.reasoning && (
         <div className="mt-4 border-t border-line pt-3">
           <p className="text-[11px] uppercase tracking-widest text-muted">
-            Reasoning (admin-only)
+            {t.aiReview.reasoning}
           </p>
           <p className="mt-1 text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
             {review.reasoning}
@@ -73,7 +76,7 @@ export default function AiReviewPanel({ review }: Props) {
       {review.evidence_concerns.length > 0 && (
         <div className="mt-4 border-t border-line pt-3">
           <p className="text-[11px] uppercase tracking-widest text-muted">
-            Flags for admin
+            {t.aiReview.flags}
           </p>
           <ul className="mt-1 space-y-1 text-sm text-slate-700">
             {review.evidence_concerns.map((c, i) => (

@@ -1,5 +1,6 @@
 import type { Evidence } from '../lib/types';
 import { EVIDENCE_TYPE_META, evidenceColor } from '../lib/evidenceTypes';
+import { useI18n } from '../lib/i18n';
 import { publicUrlForStoragePath } from '../lib/storage';
 
 type Props = { evidence: Evidence };
@@ -13,7 +14,9 @@ function hostnameOf(url: string): string {
 }
 
 export default function EvidenceRow({ evidence }: Props) {
+  const { t } = useI18n();
   const meta = EVIDENCE_TYPE_META[evidence.type];
+  const typeT = t.evidenceType[evidence.type];
   const color = evidenceColor(evidence.score);
 
   return (
@@ -22,8 +25,8 @@ export default function EvidenceRow({ evidence }: Props) {
         <div
           className="shrink-0 grid place-items-center h-12 w-12 rounded-md font-mono-num text-base font-bold text-white"
           style={{ backgroundColor: color }}
-          aria-label={`Evidence score ${evidence.score} of 5`}
-          title={`Score ${evidence.score}/5 · max ${meta.ceiling}/5 for this type`}
+          aria-label={t.evidenceRow.sourceScore(evidence.score)}
+          title={t.evidenceRow.scoreFive(evidence.score, meta.ceiling)}
         >
           {evidence.score}
         </div>
@@ -34,10 +37,10 @@ export default function EvidenceRow({ evidence }: Props) {
               className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1"
               style={{ color, borderColor: `${color}55` }}
             >
-              {meta.short}
+              {typeT.short}
             </span>
             <span className="text-[11px] font-mono-num text-muted">
-              max {meta.ceiling}/5
+              {t.evidenceType.ceilingMax(meta.ceiling)}
             </span>
           </div>
 
@@ -80,7 +83,7 @@ export default function EvidenceRow({ evidence }: Props) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 font-medium text-brand hover:underline"
                 >
-                  ↥ uploaded file
+                  {t.evidenceRow.uploadedFile}
                 </a>
               </>
             )}

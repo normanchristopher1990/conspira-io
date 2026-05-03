@@ -3,9 +3,9 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { useAuth } from '../lib/auth';
 import { useProfile, useUserTheories } from '../lib/hooks';
+import { useI18n, type Strings } from '../lib/i18n';
 import {
   EXPERT_BADGES,
-  RANKS,
   deriveRank,
   rankBadgeClasses,
   type ExpertLevel,
@@ -17,6 +17,7 @@ type Tab = 'theories' | 'about';
 export default function ProfilePage({ self = false }: { self?: boolean }) {
   const { username: routeUsername } = useParams<{ username: string }>();
   const { profile: meProfile, user, isConfigured } = useAuth();
+  const { t } = useI18n();
 
   const username = self ? meProfile?.username : routeUsername;
   const isMe = self || (meProfile && meProfile.username === routeUsername);
@@ -27,9 +28,7 @@ export default function ProfilePage({ self = false }: { self?: boolean }) {
   if (!isConfigured) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="text-sm text-muted">
-          Profiles need Supabase to be configured. Set the env vars and restart the dev server.
-        </p>
+        <p className="text-sm text-muted">{t.profile.needsSupabase}</p>
       </main>
     );
   }
@@ -42,6 +41,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
   const { data: profile, loading, error } = useProfile(username);
   const { data: theories } = useUserTheories(profile?.id);
   const { isAdmin, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   async function handleSignOut() {
@@ -52,7 +52,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
   if (loading) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12 text-sm text-muted">
-        Loading profile…
+        {t.profile.loading}
       </main>
     );
   }
@@ -60,9 +60,9 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
   if (error || !profile) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <p className="text-sm text-muted">Profile not found.</p>
+        <p className="text-sm text-muted">{t.profile.notFound}</p>
         <Link to="/" className="mt-3 inline-block text-sm font-medium text-brand hover:underline">
-          ← Back to homepage
+          {t.detail.backHome}
         </Link>
       </main>
     );
@@ -74,7 +74,6 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
     profile.rank as RankSlug,
   );
 
-  const acceptedTheories = (theories ?? []).filter((t) => t.score > 0);
   const visibleTheories =
     tab === 'theories' ? (theories ?? []).slice(0, 50) : [];
 
@@ -82,7 +81,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
     <main className="mx-auto max-w-4xl px-4 pb-16">
       <div className="pt-6">
         <Link to="/" className="text-xs font-medium text-muted hover:text-brand">
-          ← Back to feed
+          {t.profile.backToFeed}
         </Link>
       </div>
 
@@ -96,7 +95,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
               <p className="mt-1 text-sm text-slate-600">{profile.real_name}</p>
             )}
             <p className="mt-2 text-xs text-muted">
-              Joined{' '}
+              {t.profile.joined}{' '}
               <span className="font-mono-num">
                 {new Date(profile.created_at).toLocaleDateString(undefined, {
                   year: 'numeric',
@@ -112,14 +111,14 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
                 'inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ' +
                 rankBadgeClasses(rank.style)
               }
-              title={rank.notes}
+              title={t.rank[rank.slug].notes}
             >
               <span aria-hidden>★</span>
-              {rank.label}
+              {t.rank[rank.slug].label}
             </span>
             {profile.expert_level === 'verified' && (
               <span className="text-[11px] font-mono-num text-brand">
-                ✓ verified expert
+                {t.profile.verified}
               </span>
             )}
             {isMe && (
@@ -128,14 +127,14 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
                   to="/me/edit"
                   className="text-[11px] font-medium text-brand hover:underline"
                 >
-                  Edit profile →
+                  {t.profile.editProfile}
                 </Link>
                 {isAdmin && (
                   <Link
                     to="/admin"
                     className="text-[11px] font-medium text-brand hover:underline"
                   >
-                    Admin panel →
+                    {t.profile.adminPanel}
                   </Link>
                 )}
                 <button
@@ -143,7 +142,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
                   onClick={handleSignOut}
                   className="text-[11px] font-medium text-muted hover:text-score-bad"
                 >
-                  Sign out
+                  {t.profile.signOut}
                 </button>
               </div>
             )}
@@ -155,14 +154,15 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
             {profile.badges.map((b) => {
               const meta = EXPERT_BADGES[b];
               if (!meta) return null;
+              const label = (t.expertBadge as Record<string, string>)[b] ?? meta.label;
               return (
                 <span
                   key={b}
                   className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand ring-1 ring-brand/20"
-                  title={meta.label}
+                  title={label}
                 >
                   <span aria-hidden>{meta.emoji}</span>
-                  {meta.label}
+                  {label}
                 </span>
               );
             })}
@@ -170,19 +170,19 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
         )}
 
         <dl className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-line pt-5">
-          <Stat label="Accepted" value={profile.accepted_count} />
-          <Stat label="Submitted" value={(theories ?? []).length} />
-          <Stat label="Rank tier" value={rank.label} mono={false} />
-          <Stat label="Badges" value={profile.badges.length} />
+          <Stat label={t.profile.accepted} value={profile.accepted_count} />
+          <Stat label={t.profile.submitted} value={(theories ?? []).length} />
+          <Stat label={t.profile.rankTier} value={t.rank[rank.slug].label} mono={false} />
+          <Stat label={t.profile.badges} value={profile.badges.length} />
         </dl>
       </header>
 
       <nav className="mt-6 flex items-center gap-1 border-b border-line">
         <TabButton active={tab === 'theories'} onClick={() => setTab('theories')}>
-          Theories ({(theories ?? []).length})
+          {t.profile.tabTheories} ({(theories ?? []).length})
         </TabButton>
         <TabButton active={tab === 'about'} onClick={() => setTab('about')}>
-          About
+          {t.profile.tabAbout}
         </TabButton>
       </nav>
 
@@ -190,10 +190,10 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
         <section className="mt-5 grid gap-5">
           {visibleTheories.length === 0 ? (
             <div className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
-              No theories submitted yet.
+              {t.profile.noTheories}
             </div>
           ) : (
-            visibleTheories.map((t) => <TheoryCard key={t.id} theory={t} />)
+            visibleTheories.map((th) => <TheoryCard key={th.id} theory={th} />)
           )}
         </section>
       )}
@@ -201,34 +201,28 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
       {tab === 'about' && (
         <section className="mt-5 rounded-xl bg-white ring-1 ring-line p-6 space-y-3 text-sm text-slate-700">
           <p>
-            <span className="text-muted">Username:</span>{' '}
+            <span className="text-muted">{t.profile.aboutUsername}:</span>{' '}
             <span className="font-mono-num text-ink">{profile.username}</span>
           </p>
           <p>
-            <span className="text-muted">Rank:</span>{' '}
-            <span className="text-ink font-medium">{rank.label}</span>{' '}
-            <span className="text-muted">— {rank.notes}</span>
+            <span className="text-muted">{t.profile.aboutRank}:</span>{' '}
+            <span className="text-ink font-medium">{t.rank[rank.slug].label}</span>{' '}
+            <span className="text-muted">— {t.rank[rank.slug].notes}</span>
           </p>
           <p>
-            <span className="text-muted">Expert level:</span>{' '}
+            <span className="text-muted">{t.profile.aboutExpert}:</span>{' '}
             <span className="text-ink font-medium">
               {profile.expert_level.replace('_', ' ')}
             </span>
           </p>
           <p>
-            <span className="text-muted">Accepted contributions:</span>{' '}
+            <span className="text-muted">{t.profile.aboutAccepted}:</span>{' '}
             <span className="font-mono-num text-ink">
               {profile.accepted_count}
             </span>
-            {acceptedTheories.length !== profile.accepted_count && (
-              <span className="text-muted">
-                {' '}
-                ({acceptedTheories.length} visible)
-              </span>
-            )}
           </p>
           <p className="pt-2 text-xs text-muted">
-            Next rank: {nextRankNote(profile.accepted_count, profile.expert_level as ExpertLevel)}
+            {nextRankNote(profile.accepted_count, profile.expert_level as ExpertLevel, t)}
           </p>
         </section>
       )}
@@ -236,13 +230,13 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
   );
 }
 
-function nextRankNote(accepted: number, level: ExpertLevel): string {
-  if (level === 'verified') return 'Already qualifies for Leutnant — top tiers are admin-assigned.';
-  if (accepted < 1) return `${1 - accepted} accepted submission to reach ${RANKS.soldat.label}.`;
-  if (accepted < 3) return `${3 - accepted} more accepted to reach ${RANKS.korporal.label}.`;
-  if (accepted < 10) return `${10 - accepted} more accepted to reach ${RANKS.sergeant.label}.`;
-  if (accepted < 20) return `${20 - accepted} more accepted to reach ${RANKS.leutnant.label}.`;
-  return 'Hauptmann and above are admin-assigned.';
+function nextRankNote(accepted: number, level: ExpertLevel, t: Strings): string {
+  if (level === 'verified') return t.profile.nextRankExpert;
+  if (accepted < 1) return t.profile.nextRank(1 - accepted, t.rank.soldat.label);
+  if (accepted < 3) return t.profile.nextRank(3 - accepted, t.rank.korporal.label);
+  if (accepted < 10) return t.profile.nextRank(10 - accepted, t.rank.sergeant.label);
+  if (accepted < 20) return t.profile.nextRank(20 - accepted, t.rank.leutnant.label);
+  return t.profile.adminAssigned;
 }
 
 function Stat({

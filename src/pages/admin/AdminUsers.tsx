@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { setUserAdmin } from '../../lib/api';
 import { useAllProfiles } from '../../lib/hooks';
+import { useI18n } from '../../lib/i18n';
 
 export default function AdminUsers() {
+  const { t } = useI18n();
   const { data, loading, error, refetch } = useAllProfiles();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -15,7 +17,7 @@ export default function AdminUsers() {
       await setUserAdmin(userId, makeAdmin);
       refetch();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Failed.');
+      setActionError(err instanceof Error ? err.message : t.admin.failed);
     } finally {
       setBusyId(null);
     }
@@ -23,7 +25,9 @@ export default function AdminUsers() {
 
   return (
     <section className="pb-16">
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink">Users</h1>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight text-ink">
+        {t.admin.usersTitle}
+      </h1>
 
       {actionError && (
         <p className="mt-4 rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">
@@ -36,19 +40,19 @@ export default function AdminUsers() {
           {error.message}
         </div>
       ) : loading ? (
-        <p className="mt-6 text-sm text-muted">Loading…</p>
+        <p className="mt-6 text-sm text-muted">{t.takedowns.loading}</p>
       ) : (
         <div className="mt-6 overflow-x-auto rounded-xl ring-1 ring-line bg-white">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-widest text-muted">
               <tr>
-                <Th>Username</Th>
-                <Th>Joined</Th>
-                <Th>Rank</Th>
-                <Th>Expert</Th>
-                <Th>Accepted</Th>
-                <Th>Admin</Th>
-                <Th>—</Th>
+                <Th>{t.admin.usersHeaders.username}</Th>
+                <Th>{t.admin.usersHeaders.joined}</Th>
+                <Th>{t.admin.usersHeaders.rank}</Th>
+                <Th>{t.admin.usersHeaders.expert}</Th>
+                <Th>{t.admin.usersHeaders.accepted}</Th>
+                <Th>{t.admin.usersHeaders.admin}</Th>
+                <Th>{t.admin.usersHeaders.actions}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -74,7 +78,7 @@ export default function AdminUsers() {
                         day: 'numeric',
                       })}
                     </Td>
-                    <Td>{p.rank}</Td>
+                    <Td>{t.rank[p.rank].label}</Td>
                     <Td>
                       {p.expert_level === 'verified' ? (
                         <span className="text-brand">verified</span>
@@ -85,7 +89,7 @@ export default function AdminUsers() {
                     <Td mono>{p.accepted_count}</Td>
                     <Td>
                       {p.is_admin ? (
-                        <span className="font-medium text-brand">admin</span>
+                        <span className="font-medium text-brand">{t.admin.usersHeaders.admin}</span>
                       ) : (
                         <span className="text-muted">—</span>
                       )}
@@ -98,7 +102,7 @@ export default function AdminUsers() {
                           onClick={() => toggleAdmin(p.id, false)}
                           className="rounded border border-line bg-white px-2 py-1 text-xs text-score-bad hover:border-score-bad/40 disabled:opacity-50"
                         >
-                          Revoke admin
+                          {t.admin.revokeAdmin}
                         </button>
                       ) : (
                         <button
@@ -107,7 +111,7 @@ export default function AdminUsers() {
                           onClick={() => toggleAdmin(p.id, true)}
                           className="rounded border border-line bg-white px-2 py-1 text-xs text-ink hover:border-slate-300 disabled:opacity-50"
                         >
-                          Make admin
+                          {t.admin.makeAdmin}
                         </button>
                       )}
                     </Td>

@@ -3,6 +3,7 @@ import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import RequireAuth from './components/RequireAuth';
 import { AuthProvider } from './lib/auth';
+import { I18nProvider, useI18n } from './lib/i18n';
 import AboutPage from './pages/AboutPage';
 import AddEvidencePage from './pages/AddEvidencePage';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -24,8 +25,9 @@ import SubmitPage from './pages/submit/SubmitPage';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <I18nProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <div className="min-h-screen bg-bg flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <Header />
           <div className="flex-1">
@@ -65,21 +67,23 @@ export default function App() {
           <BottomNav />
         </div>
       </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </I18nProvider>
   );
 }
 
 function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="border-t border-line bg-white">
       <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted flex flex-wrap items-center justify-between gap-3">
-        <span>© Conspira — evidence-based catalogue</span>
+        <span>{t.footer.copyright}</span>
         <nav className="flex items-center gap-4">
-          <Link to="/about" className="hover:text-ink">About</Link>
-          <Link to="/takedowns" className="hover:text-ink">Takedowns</Link>
-          <Link to="/support" className="hover:text-ink">Support</Link>
-          <Link to="/submit" className="hover:text-ink">Submit</Link>
-          <span className="font-mono-num">v0.1 · preview</span>
+          <Link to="/about" className="hover:text-ink">{t.footer.about}</Link>
+          <Link to="/takedowns" className="hover:text-ink">{t.footer.takedowns}</Link>
+          <Link to="/support" className="hover:text-ink">{t.footer.support}</Link>
+          <Link to="/submit" className="hover:text-ink">{t.footer.submit}</Link>
+          <span className="font-mono-num">{t.footer.version}</span>
         </nav>
       </div>
     </footer>

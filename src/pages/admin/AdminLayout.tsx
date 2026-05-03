@@ -1,23 +1,25 @@
 import { NavLink, Outlet } from 'react-router-dom';
-
-const TABS = [
-  { to: '/admin/theories', label: 'Theory queue' },
-  { to: '/admin/takedowns', label: 'Takedowns' },
-  { to: '/admin/users', label: 'Users' },
-];
+import { useI18n } from '../../lib/i18n';
 
 export default function AdminLayout() {
+  const { t } = useI18n();
+  const tabs = [
+    { to: '/admin/theories', label: t.admin.tabs.theories },
+    { to: '/admin/takedowns', label: t.admin.tabs.takedowns },
+    { to: '/admin/users', label: t.admin.tabs.users },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl px-4">
       <div className="pt-6">
         <p className="text-xs font-mono-num uppercase tracking-widest text-muted">
-          Admin
+          {t.admin.eyebrow}
         </p>
         <nav className="mt-3 flex items-center gap-1 border-b border-line">
-          {TABS.map((t) => (
+          {tabs.map((tab) => (
             <NavLink
-              key={t.to}
-              to={t.to}
+              key={tab.to}
+              to={tab.to}
               end
               className={({ isActive }) =>
                 'relative -mb-px px-4 py-2 text-sm font-medium transition-colors ' +
@@ -26,7 +28,7 @@ export default function AdminLayout() {
                   : 'text-muted hover:text-ink border-b-2 border-transparent')
               }
             >
-              {t.label}
+              {tab.label}
             </NavLink>
           ))}
         </nav>

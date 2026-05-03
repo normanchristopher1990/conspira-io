@@ -1,5 +1,5 @@
 import { getCategory } from '../../lib/categories';
-import { EVIDENCE_TYPE_META } from '../../lib/evidenceTypes';
+import { useI18n } from '../../lib/i18n';
 import { parseYoutubeId } from '../../lib/youtube';
 import type { WizardState } from './wizardState';
 
@@ -9,17 +9,22 @@ type Props = {
 };
 
 export default function Step4Review({ state, onJumpTo }: Props) {
+  const { t } = useI18n();
   const cat = state.basics.category ? getCategory(state.basics.category) : null;
   const ytId = parseYoutubeId(state.basics.youtubeUrl);
 
   return (
     <div className="space-y-5">
-      <Section title="Theory" onEdit={() => onJumpTo(1)}>
-        <Row label="Title" value={state.basics.title || '—'} />
-        <Row label="Category" value={cat?.label ?? '—'} swatch={cat?.hue} />
-        <Row label="YouTube" value={ytId ?? (state.basics.youtubeUrl ? 'Invalid URL' : '—')} mono />
+      <Section title={t.submit.step4.sectionTheory} editLabel={t.submit.step4.edit} onEdit={() => onJumpTo(1)}>
+        <Row label={t.submit.step4.title} value={state.basics.title || '—'} />
+        <Row label={t.submit.step4.category} value={cat ? t.category[cat.slug] : '—'} swatch={cat?.hue} />
+        <Row
+          label={t.submit.step4.youtube}
+          value={ytId ?? (state.basics.youtubeUrl ? t.submit.step4.invalidUrl : '—')}
+          mono
+        />
         <div>
-          <p className="text-xs text-muted">Summary</p>
+          <p className="text-xs text-muted">{t.submit.step4.summary}</p>
           <p className="mt-1 text-sm text-ink leading-relaxed whitespace-pre-wrap">
             {state.basics.summary || '—'}
           </p>
@@ -27,12 +32,13 @@ export default function Step4Review({ state, onJumpTo }: Props) {
       </Section>
 
       <Section
-        title={`Evidence (${state.evidence.length})`}
+        title={t.submit.step4.sectionEvidence(state.evidence.length)}
+        editLabel={t.submit.step4.edit}
         onEdit={() => onJumpTo(2)}
       >
         <ul className="space-y-3">
           {state.evidence.map((e, i) => {
-            const m = e.type ? EVIDENCE_TYPE_META[e.type] : null;
+            const m = e.type ? t.evidenceType[e.type] : null;
             const declared = countDeclarations(e.involvement);
             return (
               <li
@@ -42,16 +48,16 @@ export default function Step4Review({ state, onJumpTo }: Props) {
                 <div className="flex flex-wrap items-baseline gap-2">
                   <span className="text-xs font-mono-num text-muted">#{i + 1}</span>
                   <span className="text-sm font-semibold text-ink">
-                    {e.title || '(untitled)'}
+                    {e.title || t.submit.step4.untitled}
                   </span>
                   {m && (
                     <span className="text-[11px] text-muted">
-                      · {m.short} · max {m.ceiling}/5
+                      · {m.short}
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-xs text-slate-600">
-                  {e.source || '(no source)'}
+                  {e.source || t.submit.step4.noSource}
                   {e.url && (
                     <>
                       {' · '}
@@ -61,7 +67,7 @@ export default function Step4Review({ state, onJumpTo }: Props) {
                 </p>
                 {declared > 0 && (
                   <p className="mt-1.5 text-[11px] text-brand">
-                    {declared} involvement declaration{declared === 1 ? '' : 's'}
+                    {t.submit.step4.declarations(declared)}
                   </p>
                 )}
               </li>
@@ -70,13 +76,13 @@ export default function Step4Review({ state, onJumpTo }: Props) {
         </ul>
       </Section>
 
-      <Section title="About you" onEdit={() => onJumpTo(3)}>
-        <Row label="Display name" value={state.author.displayName || '—'} />
-        <Row label="Real name" value={state.author.realName || '— (anonymous)'} />
-        <Row label="Expertise" value={state.author.expertField || '—'} />
+      <Section title={t.submit.step4.sectionAbout} editLabel={t.submit.step4.edit} onEdit={() => onJumpTo(3)}>
+        <Row label={t.submit.step4.displayName} value={state.author.displayName || '—'} />
+        <Row label={t.submit.step4.realName} value={state.author.realName || t.submit.step4.anonymous} />
+        <Row label={t.submit.step4.expertise} value={state.author.expertField || '—'} />
         {state.author.expertNote && (
           <div>
-            <p className="text-xs text-muted">Credential note</p>
+            <p className="text-xs text-muted">{t.submit.step4.credentialNote}</p>
             <p className="mt-1 text-sm text-ink whitespace-pre-wrap">
               {state.author.expertNote}
             </p>
@@ -85,12 +91,8 @@ export default function Step4Review({ state, onJumpTo }: Props) {
       </Section>
 
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
-        <p className="font-medium">Before you submit</p>
-        <p className="mt-1">
-          False involvement declarations result in a permanent ban. Your
-          submission will be reviewed first by automated analysis, then by an
-          admin. You will be notified by email when a decision is made.
-        </p>
+        <p className="font-medium">{t.submit.step4.warningTitle}</p>
+        <p className="mt-1">{t.submit.step4.warningBody}</p>
       </div>
     </div>
   );
@@ -98,10 +100,12 @@ export default function Step4Review({ state, onJumpTo }: Props) {
 
 function Section({
   title,
+  editLabel,
   onEdit,
   children,
 }: {
   title: string;
+  editLabel: string;
   onEdit: () => void;
   children: React.ReactNode;
 }) {
@@ -116,7 +120,7 @@ function Section({
           onClick={onEdit}
           className="text-xs font-medium text-brand hover:underline"
         >
-          Edit
+          {editLabel}
         </button>
       </header>
       <div className="space-y-3">{children}</div>

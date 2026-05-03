@@ -2,6 +2,7 @@ import Field from '../../components/form/Field';
 import FileUpload from '../../components/form/FileUpload';
 import { Checkbox, Select, TextInput, Textarea } from '../../components/form/inputs';
 import { EVIDENCE_TYPE_META } from '../../lib/evidenceTypes';
+import { useI18n, type Strings } from '../../lib/i18n';
 import type { EvidenceType } from '../../lib/types';
 import {
   emptyEvidence,
@@ -28,6 +29,7 @@ const EVIDENCE_TYPE_OPTIONS: EvidenceType[] = [
 ];
 
 export default function Step2Evidence({ items, onChange }: Props) {
+  const { t } = useI18n();
   const update = (id: string, patch: Partial<EvidenceDraft>) =>
     onChange(items.map((e) => (e.id === id ? { ...e, ...patch } : e)));
   const remove = (id: string) =>
@@ -36,10 +38,7 @@ export default function Step2Evidence({ items, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
-        At least one piece of evidence is required. Each one is independently scored 0–5
-        based on its type and verifiability.
-      </p>
+      <p className="text-sm text-slate-600">{t.submit.step2.intro}</p>
 
       {items.map((e, i) => (
         <EvidenceCard
@@ -49,6 +48,7 @@ export default function Step2Evidence({ items, onChange }: Props) {
           item={e}
           onChange={(patch) => update(e.id, patch)}
           onRemove={() => remove(e.id)}
+          t={t}
         />
       ))}
 
@@ -57,7 +57,7 @@ export default function Step2Evidence({ items, onChange }: Props) {
         onClick={add}
         className="w-full rounded-lg border border-dashed border-line bg-white py-3 text-sm font-medium text-brand hover:border-brand hover:bg-brand/5 transition-colors"
       >
-        + Add another piece of evidence
+        {t.submit.step2.addAnother}
       </button>
     </div>
   );
@@ -69,23 +69,26 @@ function EvidenceCard({
   item,
   onChange,
   onRemove,
+  t,
 }: {
   index: number;
   total: number;
   item: EvidenceDraft;
   onChange: (patch: Partial<EvidenceDraft>) => void;
   onRemove: () => void;
+  t: Strings;
 }) {
   const setInvolvement = (patch: Partial<Involvement>) =>
     onChange({ involvement: { ...item.involvement, ...patch } });
 
   const meta = item.type ? EVIDENCE_TYPE_META[item.type] : null;
+  const typeT = item.type ? t.evidenceType[item.type] : null;
 
   return (
     <div className="rounded-xl ring-1 ring-line bg-white p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-ink">
-          Evidence #{index + 1}
+          {t.submit.step2.indexHeader(index + 1)}
         </h3>
         {total > 1 && (
           <button
@@ -93,145 +96,143 @@ function EvidenceCard({
             onClick={onRemove}
             className="text-xs text-muted hover:text-score-bad"
           >
-            Remove
+            {t.submit.step2.remove}
           </button>
         )}
       </div>
 
-      <Field label="Evidence type" required>
+      <Field label={t.submit.step2.typeLabel} required>
         <Select
           value={item.type}
           onChange={(e) => onChange({ type: e.target.value as EvidenceType })}
         >
-          <option value="">— select a type —</option>
-          {EVIDENCE_TYPE_OPTIONS.map((t) => {
-            const m = EVIDENCE_TYPE_META[t];
+          <option value="">{t.submit.step2.typePlaceholder}</option>
+          {EVIDENCE_TYPE_OPTIONS.map((tp) => {
+            const m = EVIDENCE_TYPE_META[tp];
             return (
-              <option key={t} value={t}>
-                {m.label} (max {m.ceiling}/5)
+              <option key={tp} value={tp}>
+                {t.evidenceType[tp].label} ({t.evidenceType.ceilingMax(m.ceiling)})
               </option>
             );
           })}
         </Select>
-        {meta && (
+        {meta && typeT && (
           <p className="mt-1.5 text-xs text-muted">
-            <span className="font-mono-num text-ink">Ceiling {meta.ceiling}/5</span> —{' '}
-            {meta.reason}
+            <span className="font-mono-num text-ink">
+              {t.evidenceType.ceiling(meta.ceiling)}
+            </span>{' '}
+            — {typeT.reason}
           </p>
         )}
       </Field>
 
-      <Field label="Title" required>
+      <Field label={t.submit.step2.titleLabel} required>
         <TextInput
           value={item.title}
           onChange={(e) => onChange({ title: e.target.value })}
-          placeholder="e.g. Senate Select Committee Report on MKUltra (1977)"
+          placeholder={t.submit.step2.titlePlaceholder}
         />
       </Field>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Source" required hint="Issuing body, journal, publisher">
+        <Field label={t.submit.step2.sourceLabel} required hint={t.submit.step2.sourceHint}>
           <TextInput
             value={item.source}
             onChange={(e) => onChange({ source: e.target.value })}
-            placeholder="US Senate, 95th Congress"
+            placeholder={t.submit.step2.sourcePlaceholder}
           />
         </Field>
-        <Field label="Link to source" hint="Either a link or an upload is required">
+        <Field label={t.submit.step2.urlLabel} hint={t.submit.step2.urlHint}>
           <TextInput
             value={item.url}
             onChange={(e) => onChange({ url: e.target.value })}
-            placeholder="https://..."
+            placeholder={t.submit.step2.urlPlaceholder}
             type="url"
           />
         </Field>
       </div>
 
-      <Field label="Or upload the file directly">
+      <Field label={t.submit.step2.uploadLabel}>
         <FileUpload
           value={item.uploadedFile}
           onChange={(uploadedFile) => onChange({ uploadedFile })}
         />
       </Field>
 
-      <Field label="Description" required hint="What does it show? Why does it matter?">
+      <Field label={t.submit.step2.descriptionLabel} required hint={t.submit.step2.descriptionHint}>
         <Textarea
           value={item.description}
           onChange={(e) => onChange({ description: e.target.value })}
-          placeholder="Summarise the contents and how they relate to the theory."
         />
       </Field>
 
       <fieldset className="rounded-lg border border-line p-4">
         <legend className="px-2 text-xs font-medium uppercase tracking-widest text-muted">
-          Your involvement
+          {t.submit.step2.involvementLegend}
         </legend>
-        <p className="text-xs text-slate-500">
-          Optional. Each declaration increases the evidential weight if verified.
-          Knowingly false declarations result in a permanent ban.
-        </p>
+        <p className="text-xs text-slate-500">{t.submit.step2.involvementIntro}</p>
 
         <div className="mt-3 grid gap-2">
           <Checkbox
-            label="I was directly involved in this"
+            label={t.submit.step2.directlyInvolved}
             checked={item.involvement.directlyInvolved}
             onChange={(e) => setInvolvement({ directlyInvolved: e.target.checked })}
           />
           {item.involvement.directlyInvolved && (
             <NestedInput
-              placeholder="Describe your role"
+              placeholder={t.submit.step2.directlyInvolvedDetail}
               value={item.involvement.directlyInvolvedDetail}
               onChange={(v) => setInvolvement({ directlyInvolvedDetail: v })}
             />
           )}
 
           <Checkbox
-            label="I have insider knowledge"
+            label={t.submit.step2.insiderKnowledge}
             checked={item.involvement.insiderKnowledge}
             onChange={(e) => setInvolvement({ insiderKnowledge: e.target.checked })}
           />
           {item.involvement.insiderKnowledge && (
             <NestedInput
-              placeholder="Position / organisation (optional)"
+              placeholder={t.submit.step2.insiderKnowledgeDetail}
               value={item.involvement.insiderKnowledgeDetail}
               onChange={(v) => setInvolvement({ insiderKnowledgeDetail: v })}
             />
           )}
 
           <Checkbox
-            label="I risk my career by submitting this"
+            label={t.submit.step2.careerRisk}
             checked={item.involvement.careerRisk}
             onChange={(e) => setInvolvement({ careerRisk: e.target.checked })}
           />
           {item.involvement.careerRisk && (
             <NestedInput
-              placeholder="Current position (optional)"
+              placeholder={t.submit.step2.careerRiskDetail}
               value={item.involvement.careerRiskDetail}
               onChange={(v) => setInvolvement({ careerRiskDetail: v })}
             />
           )}
 
           <Checkbox
-            label="I risk my professional licence"
+            label={t.submit.step2.licenseRisk}
             checked={item.involvement.licenseRisk}
             onChange={(e) => setInvolvement({ licenseRisk: e.target.checked })}
           />
           {item.involvement.licenseRisk && (
             <NestedInput
-              placeholder="Licence type (e.g. ATPL, medical, bar)"
+              placeholder={t.submit.step2.licenseRiskDetail}
               value={item.involvement.licenseRiskDetail}
               onChange={(v) => setInvolvement({ licenseRiskDetail: v })}
             />
           )}
 
           <Checkbox
-            label="I risk legal consequences"
+            label={t.submit.step2.legalRisk}
             checked={item.involvement.legalRisk}
             onChange={(e) => setInvolvement({ legalRisk: e.target.checked })}
           />
           {item.involvement.legalRisk && (
             <NestedInput
-              placeholder="Description of the legal risk (optional)"
+              placeholder={t.submit.step2.legalRiskDetail}
               value={item.involvement.legalRiskDetail}
               onChange={(v) => setInvolvement({ legalRiskDetail: v })}
             />

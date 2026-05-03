@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { CATEGORIES } from '../lib/categories';
+import { useI18n } from '../lib/i18n';
 import type { CategorySlug } from '../lib/types';
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export default function CategoryFilter({ selected, onChange }: Props) {
+  const { t } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   // True when there is still content off the right edge.
   // Hides the fade when the user has scrolled to the end.
@@ -40,7 +42,7 @@ export default function CategoryFilter({ selected, onChange }: Props) {
             active={selected === 'all'}
             onClick={() => onChange('all')}
             color="#185FA5"
-            label="All categories"
+            label={t.home.filterAllCategories}
           />
           {CATEGORIES.map((c) => (
             <Chip
@@ -48,7 +50,7 @@ export default function CategoryFilter({ selected, onChange }: Props) {
               active={selected === c.slug}
               onClick={() => onChange(c.slug)}
               color={c.hue}
-              label={c.label}
+              label={t.category[c.slug]}
             />
           ))}
         </div>

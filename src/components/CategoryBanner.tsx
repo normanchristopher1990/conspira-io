@@ -1,9 +1,11 @@
 import { getCategory } from '../lib/categories';
+import { useI18n } from '../lib/i18n';
 import type { CategorySlug } from '../lib/types';
 
 type Props = { category: CategorySlug };
 
 export default function CategoryBanner({ category }: Props) {
+  const { t } = useI18n();
   const cat = getCategory(category);
   return (
     <div
@@ -22,7 +24,7 @@ export default function CategoryBanner({ category }: Props) {
       />
       <div className="relative h-full flex items-center px-4">
         <span className="font-mono-num text-[11px] uppercase tracking-[0.18em] text-white/95">
-          {cat.label}
+          {t.category[cat.slug]}
         </span>
       </div>
     </div>

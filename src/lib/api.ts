@@ -369,7 +369,7 @@ export type PublicProfile = {
   expert_field?: string | null;
   expert_note?: string | null;
   badges: string[];
-  rank: 'rekrut' | 'soldat' | 'korporal' | 'sergeant' | 'leutnant' | 'hauptmann' | 'major' | 'oberst' | 'general';
+  rank: 'zd-27' | 'orbit' | 'triad' | 'cosmos' | 'astral' | 'stellar' | 'ultra' | 'luna' | 'cosmic' | 'majestic';
   accepted_count: number;
   is_admin?: boolean;
   created_at: string;
@@ -498,7 +498,7 @@ async function fetchAuthors(ids: string[]): Promise<Map<string, CommentAuthor>> 
 
 const UNKNOWN_AUTHOR: Omit<CommentAuthor, 'id'> = {
   username: 'unknown',
-  rank: 'rekrut',
+  rank: 'zd-27',
   expert_level: 'none',
   badges: [],
   accepted_count: 0,
@@ -1082,6 +1082,80 @@ export async function listCategoryCounts(): Promise<CategoryTheoryCount[]> {
   if (error) throw error;
   return ((data ?? []) as { category_slug: CategorySlug; theory_count: number }[])
     .map((r) => ({ category: r.category_slug, count: r.theory_count }));
+}
+
+// =============================================================
+// Favorites (private bookmarks)
+// =============================================================
+
+export async function listMyFavoriteIds(): Promise<Set<string>> {
+  if (!supabase) return new Set();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Set();
+  const { data, error } = await supabase
+    .from('theory_favorites')
+    .select('theory_id')
+    .eq('user_id', user.id);
+  if (error) throw error;
+  return new Set((data ?? []).map((r: { theory_id: string }) => r.theory_id));
+}
+
+export async function listMyFavoriteTheories(): Promise<Theory[]> {
+  if (!supabase) return [];
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Two-step: ids from favorites, then theories. Sort by favorite-time
+  // (newest favorites first) by joining manually.
+  const { data: favRows, error: favErr } = await supabase
+    .from('theory_favorites')
+    .select('theory_id, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (favErr) throw favErr;
+  const favs = (favRows ?? []) as { theory_id: string; created_at: string }[];
+  if (favs.length === 0) return [];
+
+  const ids = favs.map((f) => f.theory_id);
+  const { data, error } = await supabase
+    .from('theories')
+    .select('*')
+    .in('id', ids);
+  if (error) throw error;
+  const rows = (data ?? []) as TheoryRow[];
+  const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
+  const byId = new Map<string, Theory>();
+  for (const r of rows) byId.set(r.id, rowToTheory(r, usernames));
+
+  // Preserve the favorite-time ordering.
+  const out: Theory[] = [];
+  for (const f of favs) {
+    const th = byId.get(f.theory_id);
+    if (th) out.push(th);
+  }
+  return out;
+}
+
+export async function addFavorite(theoryId: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sign in required');
+  const { error } = await supabase
+    .from('theory_favorites')
+    .insert({ user_id: user.id, theory_id: theoryId });
+  if (error && !error.message.includes('duplicate')) throw error;
+}
+
+export async function removeFavorite(theoryId: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sign in required');
+  const { error } = await supabase
+    .from('theory_favorites')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('theory_id', theoryId);
+  if (error) throw error;
 }
 
 // Admin-only: create a "seed" theory that bypasses the evidence

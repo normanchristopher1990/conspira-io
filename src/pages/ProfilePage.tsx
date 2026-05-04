@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { useAuth } from '../lib/auth';
-import { useProfile, useUserTheories } from '../lib/hooks';
+import { useMyFavoriteIds, useMyFavoriteTheories, useProfile, useUserTheories } from '../lib/hooks';
 import { useI18n, type Strings } from '../lib/i18n';
 import {
   EXPERT_BADGES,
@@ -12,7 +12,7 @@ import {
   type RankSlug,
 } from '../lib/ranks';
 
-type Tab = 'theories' | 'about';
+type Tab = 'theories' | 'favorites' | 'about';
 
 export default function ProfilePage({ self = false }: { self?: boolean }) {
   const { username: routeUsername } = useParams<{ username: string }>();
@@ -40,6 +40,9 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
   const [tab, setTab] = useState<Tab>('theories');
   const { data: profile, loading, error } = useProfile(username);
   const { data: theories } = useUserTheories(profile?.id);
+  // Favorites — only fetched when viewing own profile (RLS makes it empty for others anyway).
+  const { data: favoriteTheories } = useMyFavoriteTheories();
+  const { data: favoriteIds } = useMyFavoriteIds();
   const { isAdmin, signOut } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -181,6 +184,11 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
         <TabButton active={tab === 'theories'} onClick={() => setTab('theories')}>
           {t.profile.tabTheories} ({(theories ?? []).length})
         </TabButton>
+        {isMe && (
+          <TabButton active={tab === 'favorites'} onClick={() => setTab('favorites')}>
+            {t.profile.tabFavorites} ({(favoriteTheories ?? []).length})
+          </TabButton>
+        )}
         <TabButton active={tab === 'about'} onClick={() => setTab('about')}>
           {t.profile.tabAbout}
         </TabButton>
@@ -193,7 +201,23 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
               {t.profile.noTheories}
             </div>
           ) : (
-            visibleTheories.map((th) => <TheoryCard key={th.id} theory={th} />)
+            visibleTheories.map((th) => (
+              <TheoryCard key={th.id} theory={th} favoriteIds={favoriteIds ?? undefined} />
+            ))
+          )}
+        </section>
+      )}
+
+      {tab === 'favorites' && isMe && (
+        <section className="mt-5 grid gap-5">
+          {(favoriteTheories ?? []).length === 0 ? (
+            <div className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
+              {t.favorites.empty}
+            </div>
+          ) : (
+            (favoriteTheories ?? []).map((th) => (
+              <TheoryCard key={th.id} theory={th} favoriteIds={favoriteIds ?? undefined} />
+            ))
           )}
         </section>
       )}
@@ -232,10 +256,11 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
 
 function nextRankNote(accepted: number, level: ExpertLevel, t: Strings): string {
   if (level === 'verified') return t.profile.nextRankExpert;
-  if (accepted < 1) return t.profile.nextRank(1 - accepted, t.rank.soldat.label);
-  if (accepted < 3) return t.profile.nextRank(3 - accepted, t.rank.korporal.label);
-  if (accepted < 10) return t.profile.nextRank(10 - accepted, t.rank.sergeant.label);
-  if (accepted < 20) return t.profile.nextRank(20 - accepted, t.rank.leutnant.label);
+  if (accepted < 1)  return t.profile.nextRank(1 - accepted,  t.rank.orbit.label);
+  if (accepted < 3)  return t.profile.nextRank(3 - accepted,  t.rank.triad.label);
+  if (accepted < 10) return t.profile.nextRank(10 - accepted, t.rank.cosmos.label);
+  if (accepted < 20) return t.profile.nextRank(20 - accepted, t.rank.astral.label);
+  if (accepted < 50) return t.profile.nextRank(50 - accepted, t.rank.stellar.label);
   return t.profile.adminAssigned;
 }
 

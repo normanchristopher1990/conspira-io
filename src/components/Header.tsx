@@ -21,13 +21,12 @@ export default function Header() {
           aria-label={t.header.conspiraHome}
           className="flex items-center gap-2 group shrink-0 whitespace-nowrap"
         >
-          <span
+          <img
+            src="/logo.svg"
+            alt=""
             aria-hidden
-            className="grid place-items-center h-9 w-9 sm:h-7 sm:w-7 rounded-md text-white font-bold text-base sm:text-sm shrink-0"
-            style={{ backgroundColor: '#185FA5' }}
-          >
-            C
-          </span>
+            className="h-9 w-9 sm:h-8 sm:w-8 shrink-0"
+          />
           <span className="font-semibold tracking-tight text-ink text-2xl sm:text-xl">
             Conspira
           </span>

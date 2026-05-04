@@ -1,16 +1,18 @@
-// Rank progression — derived client-side from accepted_count + expert_level.
-// Higher tiers (hauptmann+) are admin-assigned via profiles.rank.
+// Rank progression — cosmic theme. Auto-derived (lower 6) from
+// accepted_count + expert_level; admin-assigned (upper 4) stored on
+// profiles.rank.
 
 export type RankSlug =
-  | 'rekrut'
-  | 'soldat'
-  | 'korporal'
-  | 'sergeant'
-  | 'leutnant'
-  | 'hauptmann'
-  | 'major'
-  | 'oberst'
-  | 'general';
+  | 'zd-27'
+  | 'orbit'
+  | 'triad'
+  | 'cosmos'
+  | 'astral'
+  | 'stellar'
+  | 'ultra'
+  | 'luna'
+  | 'cosmic'
+  | 'majestic';
 
 export type Rank = {
   slug: RankSlug;
@@ -20,15 +22,16 @@ export type Rank = {
 };
 
 export const RANKS: Record<RankSlug, Rank> = {
-  rekrut:    { slug: 'rekrut',    label: 'Rekrut',    style: 'grey',     notes: 'Starting rank' },
-  soldat:    { slug: 'soldat',    label: 'Soldat',    style: 'grey',     notes: 'First submission accepted' },
-  korporal:  { slug: 'korporal',  label: 'Korporal',  style: 'white',    notes: '3+ accepted theories' },
-  sergeant:  { slug: 'sergeant',  label: 'Sergeant',  style: 'white',    notes: '10+ accepted theories' },
-  leutnant:  { slug: 'leutnant',  label: 'Leutnant',  style: 'coloured', notes: 'Verified expert / 20+ accepted' },
-  hauptmann: { slug: 'hauptmann', label: 'Hauptmann', style: 'coloured', notes: 'Strong contributor with verified evidence' },
-  major:     { slug: 'major',     label: 'Major',     style: 'glow',     notes: 'Top tier — elite researcher' },
-  oberst:    { slug: 'oberst',    label: 'Oberst',    style: 'glow',     notes: 'Highly trusted contributor' },
-  general:   { slug: 'general',   label: 'General',   style: 'glow-anim',notes: 'Top contributor on the platform' },
+  'zd-27':   { slug: 'zd-27',   label: 'ZD-27',    style: 'grey',     notes: 'Starting rank' },
+  orbit:     { slug: 'orbit',   label: 'ORBIT',    style: 'grey',     notes: 'First submission accepted' },
+  triad:     { slug: 'triad',   label: 'TRIAD',    style: 'white',    notes: '3+ accepted theories' },
+  cosmos:    { slug: 'cosmos',  label: 'COSMOS',   style: 'white',    notes: '10+ accepted theories' },
+  astral:    { slug: 'astral',  label: 'ASTRAL',   style: 'coloured', notes: 'Verified expert / 20+ accepted' },
+  stellar:   { slug: 'stellar', label: 'STELLAR',  style: 'coloured', notes: '50+ accepted, strong contributor' },
+  ultra:     { slug: 'ultra',   label: 'ULTRA',    style: 'glow',     notes: 'Top tier — elite researcher' },
+  luna:      { slug: 'luna',    label: 'LUNA',     style: 'glow',     notes: 'Highly trusted contributor' },
+  cosmic:    { slug: 'cosmic',  label: 'COSMIC',   style: 'glow-anim',notes: 'Exceptional contributor' },
+  majestic:  { slug: 'majestic',label: 'MAJESTIC', style: 'glow-anim',notes: 'Top contributor on the platform' },
 };
 
 export type ExpertLevel =
@@ -43,16 +46,17 @@ export function deriveRank(
   expertLevel: ExpertLevel,
   storedRank: RankSlug,
 ): Rank {
-  // Admin-assigned tiers always win — never demote a hauptmann+ user.
-  const seniorTiers: RankSlug[] = ['hauptmann', 'major', 'oberst', 'general'];
+  // Admin-assigned tiers always win — never demote a ULTRA+ user.
+  const seniorTiers: RankSlug[] = ['ultra', 'luna', 'cosmic', 'majestic'];
   if (seniorTiers.includes(storedRank)) return RANKS[storedRank];
 
-  if (expertLevel === 'verified') return RANKS.leutnant;
-  if (acceptedCount >= 20) return RANKS.leutnant;
-  if (acceptedCount >= 10) return RANKS.sergeant;
-  if (acceptedCount >= 3)  return RANKS.korporal;
-  if (acceptedCount >= 1)  return RANKS.soldat;
-  return RANKS.rekrut;
+  if (expertLevel === 'verified') return RANKS.astral;
+  if (acceptedCount >= 50) return RANKS.stellar;
+  if (acceptedCount >= 20) return RANKS.astral;
+  if (acceptedCount >= 10) return RANKS.cosmos;
+  if (acceptedCount >= 3)  return RANKS.triad;
+  if (acceptedCount >= 1)  return RANKS.orbit;
+  return RANKS['zd-27'];
 }
 
 export function rankBadgeClasses(style: Rank['style']): string {

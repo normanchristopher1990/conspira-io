@@ -10,6 +10,8 @@ import {
   listCategoryCounts,
   listComments,
   listEvidence,
+  listMyFavoriteIds,
+  listMyFavoriteTheories,
   listPendingLinkRequestsAdmin,
   listTakedownsAdmin,
   listTakedownsPublic,
@@ -181,6 +183,16 @@ export function useTheoryTopicIds(theoryId: string | undefined): AsyncState<stri
 
 export function useCategoryCounts(): AsyncState<CategoryTheoryCount[]> {
   return useAsync(listCategoryCounts, []);
+}
+
+// Favorite IDs as a Set — lookup is O(1) for "is this theory favorited?"
+export function useMyFavoriteIds(): AsyncState<Set<string>> {
+  return useAsync(listMyFavoriteIds, []);
+}
+
+// Full theories the user has favorited, sorted by favorite-time desc.
+export function useMyFavoriteTheories(): AsyncState<Theory[]> {
+  return useAsync(listMyFavoriteTheories, []);
 }
 
 // Subscribe to Postgres changes on a table; calls onChange with a small

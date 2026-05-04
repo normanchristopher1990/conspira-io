@@ -4,6 +4,7 @@ import AiReviewPanel from '../components/AiReviewPanel';
 import CategoryBanner from '../components/CategoryBanner';
 import CommentsSection from '../components/CommentsSection';
 import EvidenceRow from '../components/EvidenceRow';
+import FavoriteButton from '../components/FavoriteButton';
 import RelatedTheoriesSection from '../components/RelatedTheoriesSection';
 import ScoreBar from '../components/ScoreBar';
 import TimelineSection from '../components/TimelineSection';
@@ -11,7 +12,7 @@ import YouTubeEmbed from '../components/YouTubeEmbed';
 import { deleteTheory, incrementViews } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { getCategory } from '../lib/categories';
-import { useAiReview, useComments, useEvidence, useTheory } from '../lib/hooks';
+import { useAiReview, useComments, useEvidence, useMyFavoriteIds, useTheory } from '../lib/hooks';
 import { useI18n, type Strings } from '../lib/i18n';
 import { localizeTheory } from '../lib/localize';
 import type { Evidence } from '../lib/types';
@@ -29,6 +30,7 @@ export default function TheoryDetailPage() {
   const { data: theory, loading, error } = useTheory(id);
   const { data: allEvidence } = useEvidence(id);
   const { data: aiReview } = useAiReview(id);
+  const { data: favoriteIds } = useMyFavoriteIds();
   const { data: comments } = useComments(id);
   const { profile: meProfile, isAdmin } = useAuth();
   const { t, lang } = useI18n();
@@ -176,9 +178,15 @@ export default function TheoryDetailPage() {
             {t.category[cat.slug]}
           </span>
 
-          <h1 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
-            {localized.title}
-          </h1>
+          <div className="mt-3 flex items-start gap-3">
+            <h1 className="flex-1 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
+              {localized.title}
+            </h1>
+            <FavoriteButton
+              theoryId={theory.id}
+              initialFavorited={favoriteIds?.has(theory.id) ?? false}
+            />
+          </div>
 
           <p className="mt-3 text-base text-slate-600 leading-relaxed">
             {localized.summary}

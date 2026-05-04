@@ -216,7 +216,7 @@ function SubmitCTA({ t }: { t: Strings }) {
 }
 
 const RANK_PARADE: RankSlug[] = [
-  'rekrut', 'soldat', 'korporal', 'sergeant', 'leutnant', 'major', 'general',
+  'zd-27', 'orbit', 'triad', 'cosmos', 'astral', 'ultra', 'majestic',
 ];
 
 function JoinRanks({ t }: { t: Strings }) {

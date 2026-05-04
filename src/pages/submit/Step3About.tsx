@@ -36,7 +36,7 @@ export default function Step3About({ value, onChange }: Props) {
         <div>
           <h3 className="text-sm font-semibold text-ink">{t.submit.step3.expertTitle}</h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            {t.submit.step3.expertIntro(t.rank.leutnant.label)}
+            {t.submit.step3.expertIntro(t.rank.astral.label)}
           </p>
         </div>
 

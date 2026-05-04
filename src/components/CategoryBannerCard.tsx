@@ -18,7 +18,7 @@ export default function CategoryBannerCard({ category, count, countLabel }: Prop
       className="block rounded-xl overflow-hidden ring-1 ring-line bg-white hover:ring-slate-300 transition-shadow shadow-card"
     >
       <div
-        className="bg-black px-4 py-2.5 flex items-center justify-between gap-4"
+        className="bg-gradient-to-br from-brand to-brand-700 px-4 py-2.5 flex items-center justify-between gap-4"
       >
         <span className="text-sm sm:text-base font-semibold tracking-tight text-white">
           {category.label}

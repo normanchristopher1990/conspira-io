@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { listTheoriesPage } from '../lib/api';
 import { CATEGORIES, getCategory } from '../lib/categories';
-import { useTopicsByCategory } from '../lib/hooks';
+import { useMyFavoriteIds, useTopicsByCategory } from '../lib/hooks';
 import { useI18n } from '../lib/i18n';
 import type { CategorySlug, SortKey, Theory, Topic } from '../lib/types';
 
@@ -18,6 +18,7 @@ export default function CategoryPage() {
   const category = validSlug ? getCategory(validSlug) : null;
 
   const { data: topics, loading: topicsLoading } = useTopicsByCategory(validSlug);
+  const { data: favoriteIds } = useMyFavoriteIds();
 
   const [theories, setTheories] = useState<Theory[]>([]);
   const [total, setTotal] = useState(0);
@@ -108,9 +109,11 @@ export default function CategoryPage() {
         ← {t.categoryPage.backHome}
       </Link>
 
-      {/* Category header — name + count only, no image (you saw it on Home) */}
-      <section className="mt-3 rounded-xl overflow-hidden ring-1 ring-line shadow-card">
-        <div className="bg-black px-5 py-3 flex items-center justify-between gap-4">
+      {/* Category header — squared bottom corners so it reads as "page header"
+          rather than a floating card. Visually anchors the rest of the page
+          to this category. */}
+      <section className="mt-3 rounded-t-xl overflow-hidden shadow-card">
+        <div className="bg-gradient-to-br from-brand to-brand-700 px-5 py-4 flex items-center justify-between gap-4">
           <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-white">
             {category.label}
           </h1>
@@ -173,7 +176,7 @@ export default function CategoryPage() {
           ) : (
             <>
               {filteredTheories.map((th) => (
-                <TheoryCard key={th.id} theory={th} />
+                <TheoryCard key={th.id} theory={th} favoriteIds={favoriteIds ?? undefined} />
               ))}
               {hasMore && (
                 <div className="flex justify-center pt-2">

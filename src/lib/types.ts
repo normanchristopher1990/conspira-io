@@ -72,3 +72,28 @@ export type Evidence = {
   submittedBy: string;
   submittedAt: string; // ISO
 };
+
+export type TheoryLinkStatus = 'pending' | 'approved' | 'rejected';
+
+// Directed containment link: parent contains child.
+// e.g. { parentId: 'flat-earth', childId: 'fake-satellites' }
+export type TheoryLink = {
+  parentId: string;
+  childId: string;
+  status: TheoryLinkStatus;
+  requestedBy: string;
+  requestedAt: string; // ISO
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  rejectReason?: string | null;
+};
+
+// A link rendered with the related theory's display data — what we show
+// in RelatedTheoriesSection (mini-cards) and in the admin queue.
+export type RelatedTheory = {
+  link: TheoryLink;
+  theory: Theory;
+  // direction='down' means the related theory is a child (this theory umfasst it)
+  // direction='up'   means the related theory is a parent (this theory is part of it)
+  direction: 'up' | 'down';
+};

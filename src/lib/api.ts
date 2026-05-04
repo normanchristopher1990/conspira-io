@@ -12,6 +12,9 @@ import type {
   EvidenceType,
   Theory,
   CategorySlug,
+  TheoryLink,
+  TheoryLinkStatus,
+  RelatedTheory,
 } from './types';
 
 // ---------- Row → domain mappers ----------
@@ -659,4 +662,256 @@ export async function setTakedownStatus(
     .update({ status, notes: notes ?? null })
     .eq('id', id);
   if (error) throw error;
+}
+
+// =============================================================
+// Theory cross-links (containment)
+// =============================================================
+
+type TheoryLinkRow = {
+  parent_id: string;
+  child_id: string;
+  status: TheoryLinkStatus;
+  requested_by: string;
+  decided_by: string | null;
+  requested_at: string;
+  decided_at: string | null;
+  reject_reason: string | null;
+};
+
+function rowToLink(row: TheoryLinkRow): TheoryLink {
+  return {
+    parentId: row.parent_id,
+    childId: row.child_id,
+    status: row.status,
+    requestedBy: row.requested_by,
+    decidedBy: row.decided_by,
+    requestedAt: row.requested_at,
+    decidedAt: row.decided_at,
+    rejectReason: row.reject_reason,
+  };
+}
+
+// Returns approved related theories in both directions, paired with the
+// related theory's display data. Used on the public TheoryDetailPage.
+export async function getRelatedTheories(theoryId: string): Promise<RelatedTheory[]> {
+  if (!supabase) return [];
+
+  // Approved links where this theory is parent (children) OR child (parents).
+  const { data: linkRows, error } = await supabase
+    .from('theory_links')
+    .select('*')
+    .or(`parent_id.eq.${theoryId},child_id.eq.${theoryId}`)
+    .eq('status', 'approved');
+  if (error) throw error;
+  const links = (linkRows ?? []) as TheoryLinkRow[];
+  if (links.length === 0) return [];
+
+  // Collect the OTHER theory ids and fetch them in one batch.
+  const otherIds = links.map((l) =>
+    l.parent_id === theoryId ? l.child_id : l.parent_id,
+  );
+  const { data: theoryRows, error: tErr } = await supabase
+    .from('theories')
+    .select('*')
+    .in('id', otherIds)
+    .eq('status', 'accepted');
+  if (tErr) throw tErr;
+  const rows = (theoryRows ?? []) as TheoryRow[];
+  const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
+  const byId = new Map<string, Theory>();
+  for (const r of rows) byId.set(r.id, rowToTheory(r, usernames));
+
+  const out: RelatedTheory[] = [];
+  for (const l of links) {
+    const otherId = l.parent_id === theoryId ? l.child_id : l.parent_id;
+    const other = byId.get(otherId);
+    if (!other) continue; // hidden theory (rejected, draft) — skip
+    out.push({
+      link: rowToLink(l),
+      theory: other,
+      direction: l.parent_id === theoryId ? 'down' : 'up',
+    });
+  }
+  return out;
+}
+
+// Returns ALL link rows for one theory (any status) where the user
+// owns one side or is admin. Used in EditTheoryPage so the submitter
+// can see their own pending requests + approved links + manage them.
+export async function getOwnTheoryLinks(theoryId: string): Promise<RelatedTheory[]> {
+  if (!supabase) return [];
+  const { data: linkRows, error } = await supabase
+    .from('theory_links')
+    .select('*')
+    .or(`parent_id.eq.${theoryId},child_id.eq.${theoryId}`);
+  if (error) throw error;
+  const links = (linkRows ?? []) as TheoryLinkRow[];
+  if (links.length === 0) return [];
+
+  const otherIds = links.map((l) =>
+    l.parent_id === theoryId ? l.child_id : l.parent_id,
+  );
+  const { data: theoryRows, error: tErr } = await supabase
+    .from('theories')
+    .select('*')
+    .in('id', otherIds);
+  if (tErr) throw tErr;
+  const rows = (theoryRows ?? []) as TheoryRow[];
+  const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
+  const byId = new Map<string, Theory>();
+  for (const r of rows) byId.set(r.id, rowToTheory(r, usernames));
+
+  return links.flatMap<RelatedTheory>((l) => {
+    const otherId = l.parent_id === theoryId ? l.child_id : l.parent_id;
+    const other = byId.get(otherId);
+    if (!other) return [];
+    return [{
+      link: rowToLink(l),
+      theory: other,
+      direction: l.parent_id === theoryId ? 'down' : 'up',
+    }];
+  });
+}
+
+// Admin queue: all pending link requests with both theories' display data.
+export type PendingLinkRequest = {
+  link: TheoryLink;
+  parent: Theory;
+  child: Theory;
+  requesterUsername: string;
+};
+
+export async function listPendingLinkRequestsAdmin(): Promise<PendingLinkRequest[]> {
+  if (!supabase) return [];
+  const { data: linkRows, error } = await supabase
+    .from('theory_links')
+    .select('*')
+    .eq('status', 'pending')
+    .order('requested_at', { ascending: false });
+  if (error) throw error;
+  const links = (linkRows ?? []) as TheoryLinkRow[];
+  if (links.length === 0) return [];
+
+  const theoryIds = Array.from(
+    new Set(links.flatMap((l) => [l.parent_id, l.child_id])),
+  );
+  const { data: theoryRows, error: tErr } = await supabase
+    .from('theories')
+    .select('*')
+    .in('id', theoryIds);
+  if (tErr) throw tErr;
+  const rows = (theoryRows ?? []) as TheoryRow[];
+
+  const submitterIds = rows.map((r) => r.submitted_by);
+  const requesterIds = links.map((l) => l.requested_by);
+  const usernames = await fetchUsernames([...submitterIds, ...requesterIds]);
+
+  const byId = new Map<string, Theory>();
+  for (const r of rows) byId.set(r.id, rowToTheory(r, usernames));
+
+  return links.flatMap<PendingLinkRequest>((l) => {
+    const parent = byId.get(l.parent_id);
+    const child = byId.get(l.child_id);
+    if (!parent || !child) return [];
+    return [{
+      link: rowToLink(l),
+      parent,
+      child,
+      requesterUsername: usernames.get(l.requested_by) ?? 'unknown',
+    }];
+  });
+}
+
+// Insert a new link request. Auto-approve trigger handles same-submitter case.
+export async function requestTheoryLink(
+  parentId: string,
+  childId: string,
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  if (parentId === childId) throw new Error('Cannot link a theory to itself');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sign in required');
+
+  const { error } = await supabase
+    .from('theory_links')
+    .insert({
+      parent_id: parentId,
+      child_id: childId,
+      requested_by: user.id,
+    });
+  if (error) throw error;
+}
+
+// Submitter cancels their own pending request, or admin deletes any link.
+export async function deleteTheoryLink(
+  parentId: string,
+  childId: string,
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { error } = await supabase
+    .from('theory_links')
+    .delete()
+    .eq('parent_id', parentId)
+    .eq('child_id', childId);
+  if (error) throw error;
+}
+
+// Admin approve / reject a pending request.
+export async function decideTheoryLink(
+  parentId: string,
+  childId: string,
+  decision: 'approved' | 'rejected',
+  rejectReason?: string,
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sign in required');
+
+  const { error } = await supabase
+    .from('theory_links')
+    .update({
+      status: decision,
+      decided_by: user.id,
+      decided_at: new Date().toISOString(),
+      reject_reason: decision === 'rejected' ? (rejectReason ?? null) : null,
+    })
+    .eq('parent_id', parentId)
+    .eq('child_id', childId);
+  if (error) throw error;
+}
+
+// Title typeahead for the link picker. Excludes the current theory itself
+// and any already-linked theories so users don't link the same pair twice.
+export async function searchTheoriesByTitle(
+  query: string,
+  excludeIds: string[] = [],
+  limit = 10,
+): Promise<Theory[]> {
+  if (!supabase) return [];
+  const trimmed = query.trim();
+  if (trimmed.length < 2) return [];
+
+  // The .or() filter format uses commas as separators, so a comma in the
+  // user's query would break the query. Strip the few characters that
+  // would confuse the parser (commas, percent signs, backslashes).
+  const safe = trimmed.replace(/[%,\\]/g, ' ');
+
+  let q = supabase
+    .from('theories')
+    .select('*')
+    .eq('status', 'accepted')
+    .or(`title.ilike.%${safe}%,title_en.ilike.%${safe}%,title_de.ilike.%${safe}%`)
+    .order('score', { ascending: false })
+    .limit(limit);
+
+  if (excludeIds.length > 0) {
+    q = q.not('id', 'in', `(${excludeIds.join(',')})`);
+  }
+
+  const { data, error } = await q;
+  if (error) throw error;
+  const rows = (data ?? []) as TheoryRow[];
+  const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
+  return rows.map((r) => rowToTheory(r, usernames));
 }

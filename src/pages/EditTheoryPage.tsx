@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import Field from '../components/form/Field';
 import { Select, TextInput, Textarea } from '../components/form/inputs';
+import RelatedTheoryPicker from '../components/RelatedTheoryPicker';
 import YouTubeEmbed from '../components/YouTubeEmbed';
 import { deleteTheory, updateTheory } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -230,6 +231,12 @@ export default function EditTheoryPage() {
           </div>
         </div>
       </form>
+
+      {id && (
+        <section className="mt-8 rounded-xl ring-1 ring-line bg-white p-5">
+          <RelatedTheoryPicker theoryId={id} />
+        </section>
+      )}
     </main>
   );
 }

@@ -5,6 +5,7 @@ export default function AdminLayout() {
   const { t } = useI18n();
   const tabs = [
     { to: '/admin/theories', label: t.admin.tabs.theories },
+    { to: '/admin/links', label: t.admin.tabs.links },
     { to: '/admin/takedowns', label: t.admin.tabs.takedowns },
     { to: '/admin/users', label: t.admin.tabs.users },
   ];

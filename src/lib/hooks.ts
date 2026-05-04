@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   getAiReview,
+  getOwnTheoryLinks,
   getProfileByUsername,
+  getRelatedTheories,
   listAllProfiles,
   listComments,
   listEvidence,
+  listPendingLinkRequestsAdmin,
   listTakedownsAdmin,
   listTakedownsPublic,
   listTheories,
@@ -13,11 +16,12 @@ import {
   listPendingTheories,
   type AiReview,
   type Comment,
+  type PendingLinkRequest,
   type PublicProfile,
   type Takedown,
 } from './api';
 import { supabase } from './supabase';
-import type { Evidence, Theory } from './types';
+import type { Evidence, RelatedTheory, Theory } from './types';
 
 export type AsyncState<T> = {
   data: T | null;
@@ -112,6 +116,29 @@ export function useComments(theoryId: string | undefined): AsyncState<Comment[]>
     () => (theoryId ? listComments(theoryId) : Promise.resolve([])),
     [theoryId],
   );
+}
+
+// Approved cross-links for a theory (public detail page).
+export function useRelatedTheories(theoryId: string | undefined): AsyncState<RelatedTheory[]> {
+  return useAsync(
+    () => (theoryId ? getRelatedTheories(theoryId) : Promise.resolve([])),
+    [theoryId],
+  );
+}
+
+// All link rows for a theory the user owns (any status). Used in
+// EditTheoryPage so the submitter can manage their own pending requests
+// alongside approved ones.
+export function useOwnTheoryLinks(theoryId: string | undefined): AsyncState<RelatedTheory[]> {
+  return useAsync(
+    () => (theoryId ? getOwnTheoryLinks(theoryId) : Promise.resolve([])),
+    [theoryId],
+  );
+}
+
+// Admin queue of pending link requests.
+export function usePendingLinkRequests(): AsyncState<PendingLinkRequest[]> {
+  return useAsync(listPendingLinkRequestsAdmin, []);
 }
 
 // Subscribe to Postgres changes on a table; calls onChange with a small

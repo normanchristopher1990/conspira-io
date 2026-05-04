@@ -4,6 +4,7 @@ import AiReviewPanel from '../components/AiReviewPanel';
 import CategoryBanner from '../components/CategoryBanner';
 import CommentsSection from '../components/CommentsSection';
 import EvidenceRow from '../components/EvidenceRow';
+import RelatedTheoriesSection from '../components/RelatedTheoriesSection';
 import ScoreBar from '../components/ScoreBar';
 import TimelineSection from '../components/TimelineSection';
 import YouTubeEmbed from '../components/YouTubeEmbed';
@@ -243,6 +244,8 @@ export default function TheoryDetailPage() {
         {tab === 'discussion' && <CommentsSection theoryId={theory.id} />}
         {tab === 'timeline' && <TimelineSection evidence={allEvidence ?? []} />}
       </div>
+
+      <RelatedTheoriesSection theoryId={theory.id} />
     </main>
   );
 }

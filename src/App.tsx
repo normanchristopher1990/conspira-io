@@ -8,6 +8,7 @@ import { I18nProvider, useI18n } from './lib/i18n';
 import AboutPage from './pages/AboutPage';
 import AddEvidencePage from './pages/AddEvidencePage';
 import AdminLayout from './pages/admin/AdminLayout';
+import AdminLinkQueue from './pages/admin/AdminLinkQueue';
 import AdminTakedowns from './pages/admin/AdminTakedowns';
 import AdminTheoriesQueue from './pages/admin/AdminTheoriesQueue';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -59,6 +60,7 @@ export default function App() {
               >
                 <Route index element={<AdminTheoriesQueue />} />
                 <Route path="theories" element={<AdminTheoriesQueue />} />
+                <Route path="links" element={<AdminLinkQueue />} />
                 <Route path="takedowns" element={<AdminTakedowns />} />
                 <Route path="users" element={<AdminUsers />} />
               </Route>

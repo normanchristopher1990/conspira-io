@@ -194,6 +194,11 @@ export default function CategoryPage() {
           )}
         </div>
       </section>
+
+      {/* Bottom blue strip — mirror of the header bar. Open at top,
+          rounded at bottom. Visually closes the "you are inside this
+          category" frame. */}
+      <div className="mt-8 h-3 rounded-b-xl bg-gradient-to-br from-brand to-brand-700" />
     </main>
   );
 }

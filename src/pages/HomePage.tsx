@@ -238,7 +238,7 @@ function JoinRanks({ t }: { t: Strings }) {
                 )}
                 <span
                   className={
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ' +
+                    'inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wider ring-1 ' +
                     rankBadgeClasses(RANKS[slug].style)
                   }
                   title={t.rank[slug].notes}

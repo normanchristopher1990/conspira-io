@@ -19,7 +19,7 @@ export default function Header() {
         <Link
           to="/"
           aria-label={t.header.conspiraHome}
-          className="flex items-center gap-2 group shrink-0 whitespace-nowrap"
+          className="flex items-center gap-1 group shrink-0 whitespace-nowrap"
         >
           <img
             src="/logo.svg"

@@ -111,7 +111,7 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
           <div className="flex flex-col items-end gap-2">
             <span
               className={
-                'inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ' +
+                'inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold tracking-wider ring-1 ' +
                 rankBadgeClasses(rank.style)
               }
               title={t.rank[rank.slug].notes}

@@ -25,7 +25,7 @@ type AuthContextValue = {
   isConfigured: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string, username: string) => Promise<void>;
-  signInWithOAuth: (provider: 'google' | 'apple') => Promise<void>;
+  signInWithOAuth: (provider: 'google' | 'facebook') => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const signInWithOAuth = useCallback(async (provider: 'google' | 'apple') => {
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'facebook') => {
     if (!supabase) throw new Error('Supabase is not configured.');
     const { error } = await supabase.auth.signInWithOAuth({
       provider,

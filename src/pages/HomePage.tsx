@@ -85,9 +85,9 @@ export default function HomePage() {
         </p>
       </section>
 
-      <HowItWorks t={t} />
-
       <SubmitCTA t={t} />
+
+      <HowItWorks t={t} />
 
       <section className="space-y-4">
         {/* Desktop: pills + sort */}

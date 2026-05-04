@@ -49,7 +49,7 @@ export default function AuthPage({ mode }: { mode: Mode }) {
     }
   }
 
-  async function oauth(provider: 'google' | 'apple') {
+  async function oauth(provider: 'google' | 'facebook') {
     setError(null);
     try {
       await signInWithOAuth(provider);
@@ -138,7 +138,7 @@ export default function AuthPage({ mode }: { mode: Mode }) {
 
       <div className="grid grid-cols-2 gap-3">
         <OAuthButton onClick={() => oauth('google')} disabled={!isConfigured} label={t.auth.google} />
-        <OAuthButton onClick={() => oauth('apple')} disabled={!isConfigured} label={t.auth.apple} />
+        <OAuthButton onClick={() => oauth('facebook')} disabled={!isConfigured} label={t.auth.facebook} />
       </div>
 
       <p className="mt-6 text-center text-xs text-muted">

@@ -33,6 +33,7 @@ export default function TheoryCard({ theory, favoriteIds }: Props) {
           theoryId={theory.id}
           initialFavorited={favorited}
           size="sm"
+          onDark
         />
       </div>
 

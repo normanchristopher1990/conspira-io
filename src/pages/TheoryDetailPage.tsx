@@ -170,6 +170,7 @@ export default function TheoryDetailPage() {
           <FavoriteButton
             theoryId={theory.id}
             initialFavorited={favoriteIds?.has(theory.id) ?? false}
+            onDark
           />
         </div>
 

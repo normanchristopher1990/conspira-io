@@ -7,6 +7,9 @@ type Props = {
   theoryId: string;
   initialFavorited: boolean;
   size?: 'sm' | 'md';
+  // True when the button sits on a dark/blue background — switches to
+  // light star colors so it stays visible.
+  onDark?: boolean;
   // If provided, called after successful toggle so parent can refetch.
   onChange?: (nowFavorited: boolean) => void;
 };
@@ -17,6 +20,7 @@ export default function FavoriteButton({
   theoryId,
   initialFavorited,
   size = 'md',
+  onDark = false,
   onChange,
 }: Props) {
   const { user } = useAuth();
@@ -55,9 +59,13 @@ export default function FavoriteButton({
       title={favorited ? t.favorites.remove : t.favorites.add}
       className={
         'inline-flex items-center justify-center rounded-md p-1.5 transition-colors ' +
-        (favorited
-          ? 'text-brand hover:bg-brand/10'
-          : 'text-slate-400 hover:text-brand hover:bg-slate-100')
+        (onDark
+          ? favorited
+            ? 'text-amber-300 hover:bg-white/10'
+            : 'text-white/70 hover:text-white hover:bg-white/10'
+          : favorited
+            ? 'text-brand hover:bg-brand/10'
+            : 'text-slate-400 hover:text-brand hover:bg-slate-100')
       }
     >
       {favorited ? (

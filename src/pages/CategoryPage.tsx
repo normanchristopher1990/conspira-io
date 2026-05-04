@@ -195,10 +195,15 @@ export default function CategoryPage() {
         </div>
       </section>
 
-      {/* Bottom blue strip — mirror of the header bar. Open at top,
-          rounded at bottom. Visually closes the "you are inside this
-          category" frame. */}
-      <div className="mt-8 h-8 rounded-b-xl bg-gradient-to-br from-brand to-brand-700" />
+      {/* Bottom blue strip — mirror of the header bar. Functional close
+          with a back-to-categories link, rounded only at the bottom so
+          it pairs visually with the header's rounded-top. */}
+      <Link
+        to="/"
+        className="mt-8 block rounded-b-xl bg-gradient-to-br from-brand to-brand-700 px-5 py-2.5 text-xs font-medium text-white/90 hover:text-white text-center"
+      >
+        ← {t.categoryPage.backHome}
+      </Link>
     </main>
   );
 }

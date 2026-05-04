@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AiReviewPanel from '../components/AiReviewPanel';
-import CategoryBanner from '../components/CategoryBanner';
 import CommentsSection from '../components/CommentsSection';
 import EvidenceRow from '../components/EvidenceRow';
 import FavoriteButton from '../components/FavoriteButton';
@@ -163,32 +162,26 @@ export default function TheoryDetailPage() {
       )}
 
       <article className="mt-3 bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden">
-        <CategoryBanner category={theory.category} />
+        {/* Blue gradient header with theory title (matches TheoryCard) */}
+        <div className="bg-gradient-to-br from-brand to-brand-700 px-5 sm:px-8 py-3 sm:py-4 flex items-start justify-between gap-3">
+          <h1 className="flex-1 text-2xl sm:text-3xl font-semibold tracking-tight leading-snug text-white">
+            {localized.title}
+          </h1>
+          <FavoriteButton
+            theoryId={theory.id}
+            initialFavorited={favoriteIds?.has(theory.id) ?? false}
+          />
+        </div>
 
         <div className="p-6 sm:p-8">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ring-1"
-            style={{ color: cat.hue, borderColor: `${cat.hue}55` }}
+          <Link
+            to={`/category/${cat.slug}`}
+            className="inline-flex items-center gap-1 text-xs text-muted hover:text-brand"
           >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: cat.hue }}
-              aria-hidden
-            />
-            {t.category[cat.slug]}
-          </span>
+            ← {t.category[cat.slug]}
+          </Link>
 
-          <div className="mt-3 flex items-start gap-3">
-            <h1 className="flex-1 text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
-              {localized.title}
-            </h1>
-            <FavoriteButton
-              theoryId={theory.id}
-              initialFavorited={favoriteIds?.has(theory.id) ?? false}
-            />
-          </div>
-
-          <p className="mt-3 text-base text-slate-600 leading-relaxed">
+          <p className="mt-4 text-base text-slate-600 leading-relaxed">
             {localized.summary}
           </p>
 

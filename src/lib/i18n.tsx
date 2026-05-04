@@ -667,6 +667,8 @@ export const EN = {
     allTheories: 'All theories in this category',
     theoriesHeading: 'Theories',
     backToCategory: 'Back to category',
+    searchPlaceholder: 'Filter theories…',
+    searchEmpty: 'No theories match your search.',
   },
   fileUpload: {
     notConfigured: 'File uploads are temporarily unavailable.',
@@ -1379,6 +1381,8 @@ export const DE: Strings = {
     allTheories: 'Alle Theorien in dieser Kategorie',
     theoriesHeading: 'Theorien',
     backToCategory: 'Zurück zur Kategorie',
+    searchPlaceholder: 'Theorien filtern…',
+    searchEmpty: 'Keine Theorien entsprechen deiner Suche.',
   },
   fileUpload: {
     notConfigured: 'Datei-Uploads sind vorübergehend nicht verfügbar.',

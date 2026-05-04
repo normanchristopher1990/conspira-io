@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { listTheoriesPage } from '../lib/api';
@@ -26,6 +26,21 @@ export default function CategoryPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sort] = useState<SortKey>('newest');
+  const [search, setSearch] = useState('');
+
+  const filteredTheories = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return theories;
+    return theories.filter((th) => {
+      const title = (th.titleEn ?? '').toLowerCase()
+        + ' ' + (th.titleDe ?? '').toLowerCase()
+        + ' ' + th.title.toLowerCase();
+      const summary = (th.summaryEn ?? '').toLowerCase()
+        + ' ' + (th.summaryDe ?? '').toLowerCase()
+        + ' ' + th.summary.toLowerCase();
+      return title.includes(q) || summary.includes(q);
+    });
+  }, [theories, search]);
 
   useEffect(() => {
     if (!validSlug) return;
@@ -134,9 +149,18 @@ export default function CategoryPage() {
 
       {/* All theories in this category */}
       <section className="mt-8">
-        <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted">
-          {hasTopics ? t.categoryPage.allTheories : t.categoryPage.theoriesHeading}
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted">
+            {hasTopics ? t.categoryPage.allTheories : t.categoryPage.theoriesHeading}
+          </h2>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t.categoryPage.searchPlaceholder}
+            className="w-full sm:w-72 rounded-md border border-line bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
+          />
+        </div>
         <div className="mt-4 grid gap-5">
           {error ? (
             <div className="rounded-xl border border-score-bad/30 bg-score-bad/5 p-6 text-sm text-score-bad">
@@ -155,9 +179,13 @@ export default function CategoryPage() {
             <div className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
               {t.home.empty}
             </div>
+          ) : filteredTheories.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-line p-10 text-center text-sm text-muted">
+              {t.categoryPage.searchEmpty}
+            </div>
           ) : (
             <>
-              {theories.map((th) => (
+              {filteredTheories.map((th) => (
                 <TheoryCard key={th.id} theory={th} />
               ))}
               {hasMore && (

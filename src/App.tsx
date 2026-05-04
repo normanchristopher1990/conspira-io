@@ -9,10 +9,12 @@ import AboutPage from './pages/AboutPage';
 import AddEvidencePage from './pages/AddEvidencePage';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminLinkQueue from './pages/admin/AdminLinkQueue';
+import AdminSeedTheory from './pages/admin/AdminSeedTheory';
 import AdminTakedowns from './pages/admin/AdminTakedowns';
 import AdminTheoriesQueue from './pages/admin/AdminTheoriesQueue';
 import AdminUsers from './pages/admin/AdminUsers';
 import AuthPage from './pages/AuthPage';
+import CategoryPage from './pages/CategoryPage';
 import EditTheoryPage from './pages/EditTheoryPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -36,6 +38,7 @@ export default function App() {
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/category/:slug" element={<CategoryPage />} />
               <Route path="/theory/:id" element={<TheoryDetailPage />} />
               <Route path="/theory/:id/edit" element={<EditTheoryPage />} />
               <Route path="/theory/:id/add-evidence" element={<AddEvidencePage />} />
@@ -61,6 +64,7 @@ export default function App() {
                 <Route index element={<AdminTheoriesQueue />} />
                 <Route path="theories" element={<AdminTheoriesQueue />} />
                 <Route path="links" element={<AdminLinkQueue />} />
+                <Route path="seed" element={<AdminSeedTheory />} />
                 <Route path="takedowns" element={<AdminTakedowns />} />
                 <Route path="users" element={<AdminUsers />} />
               </Route>

@@ -41,7 +41,15 @@ export default function TheoryCard({ theory }: Props) {
           </p>
 
           <div className="mt-4">
-            <ScoreBar score={theory.score} />
+            {theory.isSeed && theory.evidenceCount === 0 ? (
+              <div className="rounded-md bg-amber-50 ring-1 ring-amber-200 px-3 py-2">
+                <p className="text-xs font-medium text-amber-900">
+                  {t.adminSeed.awaitingEvidence}
+                </p>
+              </div>
+            ) : (
+              <ScoreBar score={theory.score} />
+            )}
           </div>
 
           <div className="mt-4 flex items-center gap-4 text-xs text-muted">

@@ -4,14 +4,19 @@ import {
   getOwnTheoryLinks,
   getProfileByUsername,
   getRelatedTheories,
+  getTheoryTopicIds,
   listAllProfiles,
+  listAllTopics,
+  listCategoryCounts,
   listComments,
   listEvidence,
   listPendingLinkRequestsAdmin,
   listTakedownsAdmin,
   listTakedownsPublic,
   listTheories,
+  listTheoriesByTopic,
   listTheoriesByUser,
+  listTopicsByCategory,
   getTheory,
   listPendingTheories,
   type AiReview,
@@ -21,7 +26,14 @@ import {
   type Takedown,
 } from './api';
 import { supabase } from './supabase';
-import type { Evidence, RelatedTheory, Theory } from './types';
+import type {
+  CategorySlug,
+  CategoryTheoryCount,
+  Evidence,
+  RelatedTheory,
+  Theory,
+  Topic,
+} from './types';
 
 export type AsyncState<T> = {
   data: T | null;
@@ -139,6 +151,36 @@ export function useOwnTheoryLinks(theoryId: string | undefined): AsyncState<Rela
 // Admin queue of pending link requests.
 export function usePendingLinkRequests(): AsyncState<PendingLinkRequest[]> {
   return useAsync(listPendingLinkRequestsAdmin, []);
+}
+
+// Topic-related hooks
+export function useTopicsByCategory(category: CategorySlug | undefined): AsyncState<Topic[]> {
+  return useAsync(
+    () => (category ? listTopicsByCategory(category) : Promise.resolve([])),
+    [category],
+  );
+}
+
+export function useAllTopics(): AsyncState<Topic[]> {
+  return useAsync(listAllTopics, []);
+}
+
+export function useTheoriesByTopic(topicId: string | undefined): AsyncState<Theory[]> {
+  return useAsync(
+    () => (topicId ? listTheoriesByTopic(topicId) : Promise.resolve([])),
+    [topicId],
+  );
+}
+
+export function useTheoryTopicIds(theoryId: string | undefined): AsyncState<string[]> {
+  return useAsync(
+    () => (theoryId ? getTheoryTopicIds(theoryId) : Promise.resolve([])),
+    [theoryId],
+  );
+}
+
+export function useCategoryCounts(): AsyncState<CategoryTheoryCount[]> {
+  return useAsync(listCategoryCounts, []);
 }
 
 // Subscribe to Postgres changes on a table; calls onChange with a small

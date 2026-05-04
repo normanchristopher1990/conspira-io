@@ -18,6 +18,7 @@ export type Category = {
   slug: CategorySlug;
   label: string;
   hue: string;
+  imageFile: string;  // filename in /public/category-images/
 };
 
 export type TheoryStatus = 'draft' | 'pending_ai' | 'pending_admin' | 'accepted' | 'rejected';
@@ -39,6 +40,24 @@ export type Theory = {
   status: TheoryStatus;
   submittedBy: string;
   submittedAt: string; // ISO
+  isSeed?: boolean;          // admin-seeded "open question" — no evidence required at creation
+};
+
+export type Topic = {
+  id: string;
+  slug: string;
+  category: CategorySlug;
+  nameEn: string;
+  nameDe: string;
+  descriptionEn?: string | null;
+  descriptionDe?: string | null;
+  imagePath?: string | null;
+  theoryCount: number;
+};
+
+export type CategoryTheoryCount = {
+  category: CategorySlug;
+  count: number;
 };
 
 export type SortKey = 'newest' | 'highest' | 'lowest' | 'most-evidence';

@@ -7,6 +7,7 @@ import {
   getEvidenceFor,
 } from './mockData';
 import type {
+  CategoryTheoryCount,
   Evidence,
   EvidenceScore,
   EvidenceType,
@@ -15,6 +16,7 @@ import type {
   TheoryLink,
   TheoryLinkStatus,
   RelatedTheory,
+  Topic,
 } from './types';
 
 // ---------- Row → domain mappers ----------
@@ -36,6 +38,7 @@ type TheoryRow = {
   view_count: number | null;
   submitted_by: string;
   created_at: string;
+  is_seed?: boolean | null;
 };
 
 type EvidenceRow = {
@@ -73,6 +76,7 @@ function rowToTheory(row: TheoryRow, usernamesById: Map<string, string>): Theory
     viewCount: row.view_count ?? 0,
     submittedBy: usernamesById.get(row.submitted_by) ?? 'unknown',
     submittedAt: row.created_at,
+    isSeed: row.is_seed ?? false,
   };
 }
 
@@ -914,4 +918,207 @@ export async function searchTheoriesByTitle(
   const rows = (data ?? []) as TheoryRow[];
   const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
   return rows.map((r) => rowToTheory(r, usernames));
+}
+
+// =============================================================
+// Topics (sub-categories) + Admin Seeding
+// =============================================================
+
+type TopicRow = {
+  id: string;
+  slug: string;
+  category_slug: CategorySlug;
+  name_en: string;
+  name_de: string;
+  description_en: string | null;
+  description_de: string | null;
+  image_path: string | null;
+  theory_count: number;
+};
+
+function rowToTopic(row: TopicRow): Topic {
+  return {
+    id: row.id,
+    slug: row.slug,
+    category: row.category_slug,
+    nameEn: row.name_en,
+    nameDe: row.name_de,
+    descriptionEn: row.description_en,
+    descriptionDe: row.description_de,
+    imagePath: row.image_path,
+    theoryCount: row.theory_count,
+  };
+}
+
+export async function listTopicsByCategory(category: CategorySlug): Promise<Topic[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('topics')
+    .select('*')
+    .eq('category_slug', category)
+    .order('name_en', { ascending: true });
+  if (error) throw error;
+  return ((data ?? []) as TopicRow[]).map(rowToTopic);
+}
+
+export async function listAllTopics(): Promise<Topic[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('topics')
+    .select('*')
+    .order('category_slug', { ascending: true })
+    .order('name_en', { ascending: true });
+  if (error) throw error;
+  return ((data ?? []) as TopicRow[]).map(rowToTopic);
+}
+
+export async function listTheoriesByTopic(topicId: string): Promise<Theory[]> {
+  if (!supabase) return [];
+  // Two-step: get theory ids from join table, then fetch theories.
+  const { data: links, error: linkErr } = await supabase
+    .from('theory_topics')
+    .select('theory_id')
+    .eq('topic_id', topicId);
+  if (linkErr) throw linkErr;
+  const ids = (links ?? []).map((l: { theory_id: string }) => l.theory_id);
+  if (ids.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('theories')
+    .select('*')
+    .in('id', ids)
+    .eq('status', 'accepted')
+    .order('score', { ascending: false });
+  if (error) throw error;
+  const rows = (data ?? []) as TheoryRow[];
+  const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
+  return rows.map((r) => rowToTheory(r, usernames));
+}
+
+export type TopicInsert = {
+  slug: string;
+  category: CategorySlug;
+  nameEn: string;
+  nameDe: string;
+  descriptionEn?: string;
+  descriptionDe?: string;
+  imagePath?: string;
+};
+
+export async function createTopic(input: TopicInsert): Promise<{ id: string }> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { data, error } = await supabase
+    .from('topics')
+    .insert({
+      slug: input.slug,
+      category_slug: input.category,
+      name_en: input.nameEn,
+      name_de: input.nameDe,
+      description_en: input.descriptionEn ?? null,
+      description_de: input.descriptionDe ?? null,
+      image_path: input.imagePath ?? null,
+    })
+    .select('id')
+    .single();
+  if (error || !data) throw error ?? new Error('Insert failed');
+  return { id: data.id as string };
+}
+
+export async function updateTopic(id: string, patch: Partial<TopicInsert>): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const row: Record<string, unknown> = {};
+  if (patch.slug !== undefined) row.slug = patch.slug;
+  if (patch.category !== undefined) row.category_slug = patch.category;
+  if (patch.nameEn !== undefined) row.name_en = patch.nameEn;
+  if (patch.nameDe !== undefined) row.name_de = patch.nameDe;
+  if (patch.descriptionEn !== undefined) row.description_en = patch.descriptionEn || null;
+  if (patch.descriptionDe !== undefined) row.description_de = patch.descriptionDe || null;
+  if (patch.imagePath !== undefined) row.image_path = patch.imagePath || null;
+  const { error } = await supabase.from('topics').update(row).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteTopic(id: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { error } = await supabase.from('topics').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function setTheoryTopics(theoryId: string, topicIds: string[]): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  // Replace the full set: delete then insert. Wrapped in best-effort
+  // (Supabase doesn't expose transactions client-side; the trigger keeps
+  // theory_count consistent through both ops).
+  const { error: delErr } = await supabase
+    .from('theory_topics')
+    .delete()
+    .eq('theory_id', theoryId);
+  if (delErr) throw delErr;
+  if (topicIds.length > 0) {
+    const rows = topicIds.map((tid) => ({ theory_id: theoryId, topic_id: tid }));
+    const { error: insErr } = await supabase.from('theory_topics').insert(rows);
+    if (insErr) throw insErr;
+  }
+}
+
+export async function getTheoryTopicIds(theoryId: string): Promise<string[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('theory_topics')
+    .select('topic_id')
+    .eq('theory_id', theoryId);
+  if (error) throw error;
+  return (data ?? []).map((r: { topic_id: string }) => r.topic_id);
+}
+
+// Theory counts per category — one row per category with at least one
+// accepted theory. Categories with zero accepted theories are absent;
+// the UI fills them in as "0".
+export async function listCategoryCounts(): Promise<CategoryTheoryCount[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('category_theory_counts')
+    .select('*');
+  if (error) throw error;
+  return ((data ?? []) as { category_slug: CategorySlug; theory_count: number }[])
+    .map((r) => ({ category: r.category_slug, count: r.theory_count }));
+}
+
+// Admin-only: create a "seed" theory that bypasses the evidence
+// requirement. The theory is accepted immediately and rendered with an
+// "Open question — awaiting evidence" badge until at least one piece
+// of evidence is submitted by a regular user.
+export type SeedTheoryInsert = {
+  title: string;
+  summary: string;
+  category: CategorySlug;
+  youtubeId?: string | null;
+  topicIds?: string[];
+};
+
+export async function createSeedTheory(input: SeedTheoryInsert): Promise<{ id: string }> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sign in required');
+
+  const { data, error } = await supabase
+    .from('theories')
+    .insert({
+      title: input.title,
+      summary: input.summary,
+      category_slug: input.category,
+      youtube_id: input.youtubeId ?? null,
+      submitted_by: user.id,
+      status: 'accepted',
+      score: 5,
+      is_seed: true,
+    })
+    .select('id')
+    .single();
+  if (error || !data) throw error ?? new Error('Insert failed');
+
+  if (input.topicIds && input.topicIds.length > 0) {
+    await setTheoryTopics(data.id as string, input.topicIds);
+  }
+  return { id: data.id as string };
 }

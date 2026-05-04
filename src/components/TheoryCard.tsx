@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
 import { localizeTheory } from '../lib/localize';
 import type { Theory } from '../lib/types';
-import CategoryBanner from './CategoryBanner';
 import ScoreBar from './ScoreBar';
 import YouTubeThumbnail from './YouTubeThumbnail';
 
@@ -19,7 +18,14 @@ export default function TheoryCard({ theory }: Props) {
   const { title, summary } = localizeTheory(theory, lang);
   return (
     <article className="group bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden transition-shadow hover:shadow-md">
-      <CategoryBanner category={theory.category} />
+      <Link
+        to={`/theory/${theory.id}`}
+        className="block bg-black px-4 py-2.5 hover:bg-slate-800 transition-colors"
+      >
+        <h2 className="text-base sm:text-lg font-semibold leading-snug text-white">
+          {title}
+        </h2>
+      </Link>
 
       <div className="p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
         <div className="min-w-0">
@@ -27,16 +33,7 @@ export default function TheoryCard({ theory }: Props) {
         </div>
 
         <div className="min-w-0 flex flex-col">
-          <h2 className="text-lg font-semibold leading-snug text-ink">
-            <Link
-              to={`/theory/${theory.id}`}
-              className="hover:text-brand transition-colors"
-            >
-              {title}
-            </Link>
-          </h2>
-
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          <p className="text-sm leading-relaxed text-slate-600">
             {summary}
           </p>
 

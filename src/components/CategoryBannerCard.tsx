@@ -8,41 +8,37 @@ type Props = {
   countLabel: string;
 };
 
-// Full-width banner card used on the new HomePage grid. Black header bar
-// with category name + count, then a 3:1 image below. The image fills via
-// object-fit: cover so 16:9 sources still look right (top/bottom cropped).
+// Netflix-style category card: full-bleed image with a dark gradient
+// overlay at the bottom and the category name + count layered on top.
+// Used in a 2-column grid on desktop, 1 column on mobile.
 export default function CategoryBannerCard({ category, count, countLabel }: Props) {
   return (
     <Link
       to={`/category/${category.slug}`}
-      className="block rounded-xl overflow-hidden ring-1 ring-line bg-white hover:ring-slate-300 transition-shadow shadow-card"
+      className="group relative block aspect-video rounded-xl overflow-hidden shadow-card"
+      style={{ backgroundColor: category.hue }}
     >
+      <img
+        src={categoryImageUrl(category)}
+        alt=""
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).style.display = 'none';
+        }}
+      />
       <div
-        className="bg-gradient-to-br from-brand to-brand-700 px-4 py-2.5 flex items-center justify-between gap-4"
-      >
-        <span className="text-sm sm:text-base font-semibold tracking-tight text-white">
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
+      />
+      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 flex items-end justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight leading-tight">
           {category.label}
-        </span>
-        <span className="text-xs font-mono-num text-white/70 inline-flex items-center gap-1.5 shrink-0">
+        </h3>
+        <span className="font-mono-num text-xs text-white/80 shrink-0 inline-flex items-center gap-1">
           <span>{count} {countLabel}</span>
           <span aria-hidden>→</span>
         </span>
-      </div>
-      <div
-        className="relative w-full"
-        style={{ aspectRatio: '3 / 1', backgroundColor: category.hue }}
-      >
-        <img
-          src={categoryImageUrl(category)}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={(e) => {
-            // If image is missing, fall back to the category hue (already set
-            // as backgroundColor on the parent) by hiding the broken image.
-            (e.currentTarget as HTMLImageElement).style.display = 'none';
-          }}
-        />
       </div>
     </Link>
   );

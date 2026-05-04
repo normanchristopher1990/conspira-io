@@ -37,11 +37,11 @@ export default function HomePage() {
 
       <SearchBar t={t} />
 
-      <section className="mt-6 space-y-3">
-        <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted">
+      <section className="mt-6">
+        <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted mb-3">
           {t.home.categoriesHeading}
         </h2>
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {CATEGORIES.map((cat) => {
             const count = countBySlug.get(cat.slug) ?? 0;
             return (

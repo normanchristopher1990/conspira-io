@@ -1,11 +1,14 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import CategoryBannerCard from '../components/CategoryBannerCard';
+import { searchTheoriesByTitle } from '../lib/api';
 import { CATEGORIES } from '../lib/categories';
 import { useAuth } from '../lib/auth';
 import { useCategoryCounts } from '../lib/hooks';
 import { useI18n, type Strings } from '../lib/i18n';
+import { localizeTheory } from '../lib/localize';
 import { RANKS, rankBadgeClasses, type RankSlug } from '../lib/ranks';
-import type { CategorySlug } from '../lib/types';
+import type { CategorySlug, Theory } from '../lib/types';
 
 export default function HomePage() {
   const { t } = useI18n();
@@ -32,6 +35,8 @@ export default function HomePage() {
 
       <HowItWorks t={t} />
 
+      <SearchBar t={t} />
+
       <section className="mt-6 space-y-3">
         <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted">
           {t.home.categoriesHeading}
@@ -53,6 +58,99 @@ export default function HomePage() {
 
       {!user && <JoinRanks t={t} />}
     </main>
+  );
+}
+
+function SearchBar({ t }: { t: Strings }) {
+  const navigate = useNavigate();
+  const { lang } = useI18n();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<Theory[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [open, setOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Debounced typeahead search.
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.trim().length < 2) {
+      setResults([]);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    debounceRef.current = setTimeout(() => {
+      searchTheoriesByTitle(query, [], 8)
+        .then((r) => setResults(r))
+        .catch(() => setResults([]))
+        .finally(() => setSearching(false));
+    }, 200);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  // Close dropdown on outside click.
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  function pick(theory: Theory) {
+    setOpen(false);
+    setQuery('');
+    navigate(`/theory/${theory.id}`);
+  }
+
+  return (
+    <div ref={containerRef} className="relative mb-6">
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder={t.home.searchPlaceholder}
+        className="w-full rounded-md border border-line bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
+      />
+
+      {open && query.trim().length >= 2 && (
+        <div className="absolute z-20 mt-1 left-0 right-0 rounded-md border border-line bg-white shadow-lg overflow-hidden">
+          {searching ? (
+            <p className="px-3 py-2 text-xs text-muted">{t.home.searching}</p>
+          ) : results.length === 0 ? (
+            <p className="px-3 py-2 text-xs text-muted">{t.home.searchNoResults}</p>
+          ) : (
+            <ul>
+              {results.map((th) => {
+                const { title } = localizeTheory(th, lang);
+                return (
+                  <li key={th.id}>
+                    <button
+                      type="button"
+                      onClick={() => pick(th)}
+                      className="w-full text-left px-3 py-2 hover:bg-bg flex items-center gap-2"
+                    >
+                      <span className="text-sm text-ink truncate flex-1">{title}</span>
+                      <span className="font-mono-num text-xs text-muted shrink-0">
+                        {th.score}/9
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import TheoryCard from '../components/TheoryCard';
 import { listTheoriesPage } from '../lib/api';
-import { CATEGORIES, categoryImageUrl, getCategory } from '../lib/categories';
+import { CATEGORIES, getCategory } from '../lib/categories';
 import { useTopicsByCategory } from '../lib/hooks';
 import { useI18n } from '../lib/i18n';
 import type { CategorySlug, SortKey, Theory, Topic } from '../lib/types';
@@ -108,8 +108,8 @@ export default function CategoryPage() {
         ← {t.categoryPage.backHome}
       </Link>
 
-      {/* Category banner header */}
-      <section className="mt-3 rounded-xl overflow-hidden ring-1 ring-line bg-white shadow-card">
+      {/* Category header — name + count only, no image (you saw it on Home) */}
+      <section className="mt-3 rounded-xl overflow-hidden ring-1 ring-line shadow-card">
         <div className="bg-black px-5 py-3 flex items-center justify-between gap-4">
           <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-white">
             {category.label}
@@ -117,19 +117,6 @@ export default function CategoryPage() {
           <span className="font-mono-num text-xs text-white/70 shrink-0">
             {total} {total === 1 ? t.home.theorySingular : t.home.theoryPlural}
           </span>
-        </div>
-        <div
-          className="relative w-full"
-          style={{ aspectRatio: '3 / 1', backgroundColor: category.hue }}
-        >
-          <img
-            src={categoryImageUrl(category)}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
         </div>
       </section>
 

@@ -15,17 +15,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-line">
-      <div className="mx-auto max-w-6xl px-4 h-20 flex items-center justify-between gap-3">
+      <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
         <Link
           to="/"
           aria-label={t.header.conspiraHome}
-          className="flex items-center gap-1 group shrink-0 whitespace-nowrap"
+          className="flex items-center gap-0.5 group shrink-0 whitespace-nowrap"
         >
           <img
             src="/logo.svg"
             alt=""
             aria-hidden
-            className="h-16 w-16 sm:h-14 sm:w-14 shrink-0"
+            className="h-6 w-6 sm:h-5 sm:w-5 shrink-0"
           />
           <span className="font-semibold tracking-tight text-ink text-2xl sm:text-xl">
             Conspira

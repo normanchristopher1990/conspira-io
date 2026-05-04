@@ -5,7 +5,6 @@ import { listTheoriesPage } from '../lib/api';
 import { CATEGORIES, categoryImageUrl, getCategory } from '../lib/categories';
 import { useTopicsByCategory } from '../lib/hooks';
 import { useI18n } from '../lib/i18n';
-import { localizeTheory } from '../lib/localize';
 import type { CategorySlug, SortKey, Theory, Topic } from '../lib/types';
 
 const PAGE_SIZE = 12;
@@ -91,7 +90,7 @@ export default function CategoryPage() {
         to="/"
         className="mt-6 inline-block text-xs text-muted hover:text-ink"
       >
-        ← {t.category.backHome}
+        ← {t.categoryPage.backHome}
       </Link>
 
       {/* Category banner header */}
@@ -123,7 +122,7 @@ export default function CategoryPage() {
       {!topicsLoading && hasTopics && (
         <section className="mt-8">
           <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted">
-            {t.category.topicsHeading}
+            {t.categoryPage.topicsHeading}
           </h2>
           <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(topics ?? []).map((topic) => (
@@ -136,7 +135,7 @@ export default function CategoryPage() {
       {/* All theories in this category */}
       <section className="mt-8">
         <h2 className="text-xs font-mono-num uppercase tracking-widest text-muted">
-          {hasTopics ? t.category.allTheories : t.category.theoriesHeading}
+          {hasTopics ? t.categoryPage.allTheories : t.categoryPage.theoriesHeading}
         </h2>
         <div className="mt-4 grid gap-5">
           {error ? (

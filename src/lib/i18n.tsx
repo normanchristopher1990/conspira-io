@@ -661,7 +661,7 @@ export const EN = {
     body: 'That page doesn\'t exist. Maybe it was suppressed.',
     backHome: 'Back to homepage',
   },
-  category: {
+  categoryPage: {
     backHome: 'All categories',
     topicsHeading: 'Topics',
     allTheories: 'All theories in this category',
@@ -1373,7 +1373,7 @@ export const DE: Strings = {
     body: 'Diese Seite existiert nicht. Vielleicht wurde sie unterdrückt.',
     backHome: 'Zurück zur Startseite',
   },
-  category: {
+  categoryPage: {
     backHome: 'Alle Kategorien',
     topicsHeading: 'Themen',
     allTheories: 'Alle Theorien in dieser Kategorie',

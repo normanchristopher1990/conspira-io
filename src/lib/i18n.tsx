@@ -68,7 +68,7 @@ export const EN = {
       button: 'Submit a theory',
     },
     joinRanks: {
-      title: 'Join to earn ranks from Rekrut to General',
+      title: 'Join to earn ranks from ZD-27 to MAJESTIC',
       body: 'Verified experts get domain badges and start at the Leutnant rank.',
       button: 'Create an account',
     },
@@ -794,7 +794,7 @@ export const DE: Strings = {
       button: 'Theorie einreichen',
     },
     joinRanks: {
-      title: 'Werde Mitglied und steige vom Rekrut zum General auf',
+      title: 'Werde Mitglied und steige vom ZD-27 zum MAJESTIC auf',
       body: 'Verifizierte Experten erhalten Fachabzeichen und starten im Rang Leutnant.',
       button: 'Konto erstellen',
     },

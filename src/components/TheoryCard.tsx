@@ -25,7 +25,7 @@ export default function TheoryCard({ theory, favoriteIds }: Props) {
     <article className="group bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden transition-shadow hover:shadow-md">
       <div className="bg-gradient-to-br from-brand to-brand-700 px-4 py-2 flex items-center justify-between gap-2 hover:from-brand-600 hover:to-brand-800 transition-colors">
         <Link to={`/theory/${theory.id}`} className="min-w-0 flex-1 block py-0.5">
-          <h2 className="text-base sm:text-lg font-semibold leading-snug text-white truncate">
+          <h2 className="text-sm sm:text-base font-semibold leading-snug text-white">
             {title}
           </h2>
         </Link>

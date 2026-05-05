@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Field from '../components/form/Field';
-import { Checkbox, TextInput, Textarea } from '../components/form/inputs';
+import { TextInput, Textarea } from '../components/form/inputs';
 import { deleteMyAccount, getProfileById, updateMyProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/i18n';
-import { EXPERT_BADGES } from '../lib/ranks';
 
 export default function ProfileEditPage() {
   const { user, isConfigured, profile: meBasic } = useAuth();
@@ -16,7 +15,6 @@ export default function ProfileEditPage() {
   const [realName, setRealName] = useState('');
   const [expertField, setExpertField] = useState('');
   const [expertNote, setExpertNote] = useState('');
-  const [badges, setBadges] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +28,6 @@ export default function ProfileEditPage() {
       setRealName(p.real_name ?? '');
       setExpertField(p.expert_field ?? '');
       setExpertNote(p.expert_note ?? '');
-      setBadges(new Set(p.badges ?? []));
       setLoading(false);
     });
     return () => {
@@ -49,15 +46,6 @@ export default function ProfileEditPage() {
     return <Navigate to="/login?next=/me/edit" replace />;
   }
 
-  function toggleBadge(slug: string) {
-    setBadges((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
-  }
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -74,7 +62,6 @@ export default function ProfileEditPage() {
         real_name: realName.trim() || null,
         expert_field: expertField.trim() || null,
         expert_note: expertNote.trim() || null,
-        badges: Array.from(badges),
       });
       navigate('/me');
     } catch (e2) {
@@ -141,24 +128,6 @@ export default function ProfileEditPage() {
             placeholder="Role, institution, public register, ORCID, LinkedIn — anything verifiable."
           />
         </Field>
-
-        <div>
-          <p className="text-sm font-medium text-ink">{t.profileEdit.badgesTitle}</p>
-          <p className="text-xs text-muted">{t.profileEdit.badgesIntro}</p>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {Object.entries(EXPERT_BADGES).map(([slug, meta]) => {
-              const label = (t.expertBadge as Record<string, string>)[slug] ?? meta.label;
-              return (
-                <Checkbox
-                  key={slug}
-                  label={`${meta.emoji}  ${label}`}
-                  checked={badges.has(slug)}
-                  onChange={() => toggleBadge(slug)}
-                />
-              );
-            })}
-          </div>
-        </div>
 
         {error && (
           <p className="rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">{error}</p>

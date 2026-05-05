@@ -5,7 +5,6 @@ import { useAuth } from '../lib/auth';
 import { useMyFavoriteIds, useMyFavoriteTheories, useProfile, useUserTheories } from '../lib/hooks';
 import { useI18n, type Strings } from '../lib/i18n';
 import {
-  EXPERT_BADGES,
   deriveRank,
   rankBadgeClasses,
   type ExpertLevel,
@@ -152,31 +151,10 @@ function ProfileBody({ username, isMe }: { username: string | undefined; isMe: b
           </div>
         </div>
 
-        {profile.badges.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2">
-            {profile.badges.map((b) => {
-              const meta = EXPERT_BADGES[b];
-              if (!meta) return null;
-              const label = (t.expertBadge as Record<string, string>)[b] ?? meta.label;
-              return (
-                <span
-                  key={b}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand ring-1 ring-brand/20"
-                  title={label}
-                >
-                  <span aria-hidden>{meta.emoji}</span>
-                  {label}
-                </span>
-              );
-            })}
-          </div>
-        )}
-
-        <dl className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-line pt-5">
+        <dl className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-line pt-5">
           <Stat label={t.profile.accepted} value={profile.accepted_count} />
           <Stat label={t.profile.submitted} value={(theories ?? []).length} />
           <Stat label={t.profile.rankTier} value={t.rank[rank.slug].label} mono={false} />
-          <Stat label={t.profile.badges} value={profile.badges.length} />
         </dl>
       </header>
 

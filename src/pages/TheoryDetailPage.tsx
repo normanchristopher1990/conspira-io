@@ -186,20 +186,34 @@ export default function TheoryDetailPage() {
             {localized.summary}
           </p>
 
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-6">
-            <div>
-              <YouTubeEmbed videoId={theory.youtubeId} title={localized.title} />
-            </div>
+          <div
+            className={
+              theory.youtubeId
+                ? 'mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-6'
+                : 'mt-6'
+            }
+          >
+            {theory.youtubeId && (
+              <div>
+                <YouTubeEmbed videoId={theory.youtubeId} title={localized.title} />
+              </div>
+            )}
             <div className="rounded-lg ring-1 ring-line bg-slate-50 p-4">
               {theory.isSeed && theory.evidenceCount === 0 ? (
-                <div className="rounded-md bg-amber-50 ring-1 ring-amber-200 px-3 py-3 text-center">
+                <Link
+                  to={`/theory/${theory.id}/add-evidence`}
+                  className="block rounded-md bg-amber-50 ring-1 ring-amber-200 px-3 py-3 text-center hover:bg-amber-100 hover:ring-amber-300 transition-colors"
+                >
                   <p className="text-xs font-mono-num uppercase tracking-widest text-amber-900">
                     {t.adminSeed.awaitingEvidence}
                   </p>
                   <p className="mt-2 text-xs text-amber-800 leading-relaxed">
                     {t.adminSeed.awaitingEvidenceHint}
                   </p>
-                </div>
+                  <p className="mt-3 text-xs font-medium text-amber-900 underline underline-offset-2">
+                    {t.detail.addEvidence}
+                  </p>
+                </Link>
               ) : (
                 <>
                   <h2 className="text-xs uppercase tracking-widest text-muted">

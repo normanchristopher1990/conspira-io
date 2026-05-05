@@ -65,14 +65,22 @@ export default function TheoryCard({ theory, favoriteIds }: Props) {
         </ul>
       )}
 
-      <div className="relative p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
-        <div className="min-w-0 relative z-10">
-          <YouTubeThumbnail
-            videoId={theory.youtubeId}
-            title={title}
-            fallbackImage={theory.imageUrl || categoryImageUrl(getCategory(theory.category))}
-          />
-        </div>
+      <div
+        className={
+          theory.youtubeId
+            ? 'relative p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5'
+            : 'relative p-5'
+        }
+      >
+        {theory.youtubeId && (
+          <div className="min-w-0 relative z-10">
+            <YouTubeThumbnail
+              videoId={theory.youtubeId}
+              title={title}
+              fallbackImage={theory.imageUrl || categoryImageUrl(getCategory(theory.category))}
+            />
+          </div>
+        )}
 
         <div className="min-w-0 flex flex-col">
           <p className="text-sm leading-relaxed text-slate-600">

@@ -3,14 +3,36 @@ import { useI18n } from '../lib/i18n';
 type Props = {
   videoId: string | null;
   title: string;
+  // Used when the theory has no YouTube video — falls back to the
+  // category banner image so the card stays visually rich.
+  fallbackImage?: string;
 };
 
 // Lightweight alternative to embedding an iframe per card — the homepage
 // would otherwise mount one player per card and stutter on mobile.
 // The whole thumbnail is the link; the play button is purely visual.
-export default function YouTubeThumbnail({ videoId, title }: Props) {
+export default function YouTubeThumbnail({ videoId, title, fallbackImage }: Props) {
   const { t } = useI18n();
   if (!videoId) {
+    if (fallbackImage) {
+      return (
+        <div className="relative aspect-video w-full overflow-hidden rounded-md ring-1 ring-line bg-slate-100">
+          <img
+            src={fallbackImage}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-black/30 to-black/0"
+          />
+        </div>
+      );
+    }
     return (
       <div className="aspect-video w-full rounded-md bg-slate-100 ring-1 ring-line flex items-center justify-center text-xs text-muted">
         {t.card.noVideo}

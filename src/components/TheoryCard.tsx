@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { getCategory } from '../lib/categories';
+import { categoryImageUrl, getCategory } from '../lib/categories';
 import { useI18n } from '../lib/i18n';
 import { localizeTheory } from '../lib/localize';
 import type { Theory } from '../lib/types';
@@ -23,23 +23,32 @@ export default function TheoryCard({ theory, favoriteIds }: Props) {
   const { title, summary } = localizeTheory(theory, lang);
   const favorited = favoriteIds?.has(theory.id) ?? false;
   return (
-    <article className="group bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden transition-shadow hover:shadow-md">
-      <div className="bg-gradient-to-br from-brand to-brand-700 px-4 py-2 flex items-center justify-between gap-2 hover:from-brand-600 hover:to-brand-800 transition-colors">
-        <Link to={`/theory/${theory.id}`} className="min-w-0 flex-1 block py-0.5">
-          <h2 className="text-sm sm:text-base font-semibold leading-snug text-white">
-            {title}
-          </h2>
-        </Link>
-        <FavoriteButton
-          theoryId={theory.id}
-          initialFavorited={favorited}
-          size="sm"
-          onDark
-        />
+    <article className="group relative bg-white rounded-xl shadow-card ring-1 ring-line overflow-hidden transition-shadow hover:shadow-md">
+      {/* Card-wide click target. The pseudo-element covers the whole article;
+          interactive children (favorite button, chips, video link) sit on top
+          via relative z-10 to intercept clicks before they reach this layer. */}
+      <Link
+        to={`/theory/${theory.id}`}
+        aria-label={title}
+        className="absolute inset-0 z-0"
+      />
+
+      <div className="relative bg-gradient-to-br from-brand to-brand-700 px-4 py-2 flex items-center justify-between gap-2 group-hover:from-brand-600 group-hover:to-brand-800 transition-colors">
+        <h2 className="min-w-0 flex-1 text-sm sm:text-base font-semibold leading-snug text-white">
+          {title}
+        </h2>
+        <span className="relative z-10">
+          <FavoriteButton
+            theoryId={theory.id}
+            initialFavorited={favorited}
+            size="sm"
+            onDark
+          />
+        </span>
       </div>
 
       {(theory.secondaryCategories?.length ?? 0) > 0 && (
-        <ul className="flex flex-wrap items-center gap-1.5 px-4 pt-3 pb-1">
+        <ul className="relative z-10 flex flex-wrap items-center gap-1.5 px-4 pt-3 pb-1">
           {theory.secondaryCategories!.map((slug) => {
             const c = getCategory(slug);
             return (
@@ -56,9 +65,13 @@ export default function TheoryCard({ theory, favoriteIds }: Props) {
         </ul>
       )}
 
-      <div className="p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
-        <div className="min-w-0">
-          <YouTubeThumbnail videoId={theory.youtubeId} title={title} />
+      <div className="relative p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
+        <div className="min-w-0 relative z-10">
+          <YouTubeThumbnail
+            videoId={theory.youtubeId}
+            title={title}
+            fallbackImage={theory.imageUrl || categoryImageUrl(getCategory(theory.category))}
+          />
         </div>
 
         <div className="min-w-0 flex flex-col">

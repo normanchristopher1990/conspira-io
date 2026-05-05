@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import TheoryCard from '../components/TheoryCard';
+import TheoryTile from '../components/TheoryTile';
 import { listTheoriesPage } from '../lib/api';
 import { CATEGORIES, getCategory } from '../lib/categories';
 import { useMyFavoriteIds, useTopicsByCategory } from '../lib/hooks';
@@ -151,7 +151,7 @@ export default function CategoryPage() {
             className="w-full sm:w-72 rounded-md border border-line bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
           />
         </div>
-        <div className="mt-4 grid gap-5">
+        <div className="mt-4">
           {error ? (
             <div className="rounded-xl border border-score-bad/30 bg-score-bad/5 p-6 text-sm text-score-bad">
               {t.home.failedToLoad(error)}
@@ -175,9 +175,11 @@ export default function CategoryPage() {
             </div>
           ) : (
             <>
-              {filteredTheories.map((th) => (
-                <TheoryCard key={th.id} theory={th} favoriteIds={favoriteIds ?? undefined} />
-              ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {filteredTheories.map((th) => (
+                  <TheoryTile key={th.id} theory={th} favoriteIds={favoriteIds ?? undefined} />
+                ))}
+              </div>
               {hasMore && (
                 <div className="flex justify-center pt-2">
                   <button

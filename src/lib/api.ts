@@ -39,6 +39,7 @@ type TheoryRow = {
   submitted_by: string;
   created_at: string;
   is_seed?: boolean | null;
+  image_url?: string | null;
 };
 
 type EvidenceRow = {
@@ -82,6 +83,7 @@ function rowToTheory(
     submittedBy: usernamesById.get(row.submitted_by) ?? 'unknown',
     submittedAt: row.created_at,
     isSeed: row.is_seed ?? false,
+    imageUrl: row.image_url ?? null,
   };
 }
 

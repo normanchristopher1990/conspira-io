@@ -42,6 +42,7 @@ export type Theory = {
   submittedBy: string;
   submittedAt: string; // ISO
   isSeed?: boolean;          // admin-seeded "open question" — no evidence required at creation
+  imageUrl?: string | null;  // custom image (Unsplash/Wikimedia/AI) — overrides YouTube thumb / category fallback
 };
 
 export type Topic = {

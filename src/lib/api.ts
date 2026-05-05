@@ -1085,6 +1085,18 @@ export async function listCategoryCounts(): Promise<CategoryTheoryCount[]> {
 }
 
 // =============================================================
+// Account self-deletion (DSGVO / GDPR)
+// =============================================================
+
+export async function deleteMyAccount(): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw error;
+  // Server-side row is gone; locally clear the session too.
+  await supabase.auth.signOut();
+}
+
+// =============================================================
 // Favorites (private bookmarks)
 // =============================================================
 

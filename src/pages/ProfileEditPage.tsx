@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Field from '../components/form/Field';
 import { Checkbox, TextInput, Textarea } from '../components/form/inputs';
-import { getProfileById, updateMyProfile } from '../lib/api';
+import { deleteMyAccount, getProfileById, updateMyProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/i18n';
 import { EXPERT_BADGES } from '../lib/ranks';
@@ -177,6 +177,101 @@ export default function ProfileEditPage() {
           </button>
         </div>
       </form>
+
+      <DangerZone />
     </main>
+  );
+}
+
+// Account deletion — multi-step confirmation to prevent accidental clicks.
+// Step 1: small grey link to expand. Step 2: warning + username typing.
+// Step 3: final delete (only enabled when typed correctly).
+function DangerZone() {
+  const { profile, signOut } = useAuth();
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const username = profile?.username ?? '';
+  const canDelete = confirmText.trim() === username && username.length > 0;
+
+  async function handleDelete() {
+    if (!canDelete) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await deleteMyAccount();
+      await signOut();
+      navigate('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.profileEdit.deleteFailed);
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mt-12 border-t border-line pt-8">
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-xs text-muted hover:text-score-bad underline-offset-4 hover:underline"
+        >
+          {t.profileEdit.dangerLink}
+        </button>
+      ) : (
+        <div className="rounded-xl border border-score-bad/30 bg-score-bad/5 p-5 space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-score-bad">
+              {t.profileEdit.dangerTitle}
+            </h3>
+            <p className="mt-1 text-xs text-slate-700 leading-relaxed">
+              {t.profileEdit.dangerBody}
+            </p>
+          </div>
+
+          <Field label={t.profileEdit.dangerConfirmLabel(username)}>
+            <TextInput
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              autoComplete="off"
+              placeholder={username}
+            />
+          </Field>
+
+          {error && (
+            <p className="rounded-md bg-score-bad/10 px-3 py-2 text-xs text-score-bad">
+              {error}
+            </p>
+          )}
+
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setConfirmText('');
+                setError(null);
+              }}
+              disabled={busy}
+              className="text-sm text-slate-600 hover:text-ink"
+            >
+              {t.profileEdit.cancel}
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={!canDelete || busy}
+              className="rounded-md bg-score-bad px-5 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              {busy ? t.profileEdit.deleting : t.profileEdit.dangerConfirmButton}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

@@ -386,6 +386,7 @@ export type TheoryInsert = {
   summary: string;
   category_slug: CategorySlug;
   youtube_id: string | null;
+  image_url: string | null;
 };
 
 export async function submitTheory(
@@ -1125,6 +1126,42 @@ export async function setTheoryTopics(theoryId: string, topicIds: string[]): Pro
     const { error: insErr } = await supabase.from('theory_topics').insert(rows);
     if (insErr) throw insErr;
   }
+}
+
+// Replace the full set of theories assigned to a topic. Mirror of
+// setTheoryTopics but pinned to the topic side — admin UI uses this
+// to manage all theories on a single topic page.
+export async function setTopicTheories(topicId: string, theoryIds: string[]): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  const { error: delErr } = await supabase
+    .from('theory_topics')
+    .delete()
+    .eq('topic_id', topicId);
+  if (delErr) throw delErr;
+  if (theoryIds.length > 0) {
+    const rows = theoryIds.map((tid) => ({ theory_id: tid, topic_id: topicId }));
+    const { error: insErr } = await supabase.from('theory_topics').insert(rows);
+    if (insErr) throw insErr;
+  }
+}
+
+// Lightweight list of accepted theories — id, title, category — for
+// the admin topic editor. Title-based search + checkbox UI.
+export async function listAllTheoriesMinimal(): Promise<
+  Array<{ id: string; title: string; category: CategorySlug }>
+> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('theories')
+    .select('id,title,category_slug')
+    .eq('status', 'accepted')
+    .order('title', { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((r: { id: string; title: string; category_slug: CategorySlug }) => ({
+    id: r.id,
+    title: r.title,
+    category: r.category_slug,
+  }));
 }
 
 export async function getTheoryTopicIds(theoryId: string): Promise<string[]> {

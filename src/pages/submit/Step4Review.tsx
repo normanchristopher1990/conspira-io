@@ -29,6 +29,15 @@ export default function Step4Review({ state, onJumpTo }: Props) {
             {state.basics.summary || '—'}
           </p>
         </div>
+        {state.basics.imageUrl && (
+          <div className="relative aspect-video w-full overflow-hidden rounded-md ring-1 ring-line bg-slate-100">
+            <img
+              src={state.basics.imageUrl}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </div>
+        )}
       </Section>
 
       <Section

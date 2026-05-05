@@ -59,6 +59,7 @@ export type WizardState = {
     category: CategorySlug | '';
     summary: string;
     youtubeUrl: string;
+    imageUrl: string;
   };
   evidence: EvidenceDraft[];
   author: {
@@ -71,7 +72,7 @@ export type WizardState = {
 
 export function initialState(): WizardState {
   return {
-    basics: { title: '', category: '', summary: '', youtubeUrl: '' },
+    basics: { title: '', category: '', summary: '', youtubeUrl: '', imageUrl: '' },
     evidence: [emptyEvidence()],
     author: { displayName: '', realName: '', expertField: '', expertNote: '' },
   };

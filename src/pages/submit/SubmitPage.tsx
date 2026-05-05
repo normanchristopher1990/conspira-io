@@ -82,6 +82,7 @@ export default function SubmitPage() {
             summary: state.basics.summary.trim(),
             category_slug: state.basics.category,
             youtube_id: parseYoutubeId(state.basics.youtubeUrl),
+            image_url: state.basics.imageUrl.trim() || null,
           },
           state.evidence
             .filter((e) => e.type)

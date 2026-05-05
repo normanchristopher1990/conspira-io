@@ -7,6 +7,7 @@ export default function AdminLayout() {
     { to: '/admin/theories', label: t.admin.tabs.theories },
     { to: '/admin/links', label: t.admin.tabs.links },
     { to: '/admin/seed', label: t.admin.tabs.seed },
+    { to: '/admin/topics', label: t.admin.tabs.topics },
     { to: '/admin/takedowns', label: t.admin.tabs.takedowns },
     { to: '/admin/users', label: t.admin.tabs.users },
   ];

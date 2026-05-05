@@ -1,5 +1,6 @@
 import Field from '../../components/form/Field';
 import { Select, TextInput, Textarea } from '../../components/form/inputs';
+import PixabayImagePicker from '../../components/PixabayImagePicker';
 import YouTubeEmbed from '../../components/YouTubeEmbed';
 import { CATEGORIES } from '../../lib/categories';
 import { useI18n } from '../../lib/i18n';
@@ -78,6 +79,17 @@ export default function Step1Basics({ value, onChange }: Props) {
           <YouTubeEmbed videoId={ytId} title={t.submit.step1.preview} />
         </div>
       )}
+
+      <Field
+        label={t.submit.step1.imageLabel}
+        hint={t.submit.step1.imageHint}
+      >
+        <PixabayImagePicker
+          value={value.imageUrl}
+          onChange={(url) => set('imageUrl', url)}
+          seedQuery={value.title}
+        />
+      </Field>
     </div>
   );
 }

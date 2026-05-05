@@ -12,6 +12,7 @@ import AdminLinkQueue from './pages/admin/AdminLinkQueue';
 import AdminSeedTheory from './pages/admin/AdminSeedTheory';
 import AdminTakedowns from './pages/admin/AdminTakedowns';
 import AdminTheoriesQueue from './pages/admin/AdminTheoriesQueue';
+import AdminTopics from './pages/admin/AdminTopics';
 import AdminUsers from './pages/admin/AdminUsers';
 import AuthPage from './pages/AuthPage';
 import CategoryPage from './pages/CategoryPage';
@@ -65,6 +66,7 @@ export default function App() {
                 <Route path="theories" element={<AdminTheoriesQueue />} />
                 <Route path="links" element={<AdminLinkQueue />} />
                 <Route path="seed" element={<AdminSeedTheory />} />
+                <Route path="topics" element={<AdminTopics />} />
                 <Route path="takedowns" element={<AdminTakedowns />} />
                 <Route path="users" element={<AdminUsers />} />
               </Route>

@@ -24,10 +24,15 @@ $projectRef = "kaqyumwuwcgusibelcju"
 $supabaseUrl = "https://$projectRef.supabase.co"
 $serviceKey = $env:SUPABASE_SERVICE_KEY
 
-# Fetch all theory ids that still need translation
+# Fetch all theory ids that still need translation.
+# UserAgent must NOT look like a browser — Supabase blocks secret keys
+# from any client that looks like one (Mozilla/Chrome/etc).
+$ua = "Conspira-Translate-Script/1.0"
+
 Write-Host "Fetching untranslated theories..." -ForegroundColor Cyan
 $resp = Invoke-RestMethod `
     -Uri "$supabaseUrl/rest/v1/theories?select=id,title&title_en=is.null" `
+    -UserAgent $ua `
     -Headers @{
         "apikey" = $serviceKey
         "Authorization" = "Bearer $serviceKey"
@@ -48,7 +53,9 @@ foreach ($theory in $resp) {
         Invoke-RestMethod `
             -Uri "$supabaseUrl/functions/v1/translate-theory" `
             -Method Post `
+            -UserAgent $ua `
             -Headers @{
+                "apikey" = $serviceKey
                 "Authorization" = "Bearer $serviceKey"
                 "Content-Type" = "application/json"
             } `

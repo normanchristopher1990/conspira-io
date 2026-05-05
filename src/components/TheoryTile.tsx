@@ -15,7 +15,7 @@ type Props = {
 // favorite star intercepts its own click.
 export default function TheoryTile({ theory, favoriteIds }: Props) {
   const { lang } = useI18n();
-  const { title } = localizeTheory(theory, lang);
+  const { title, summary } = localizeTheory(theory, lang);
   const favorited = favoriteIds?.has(theory.id) ?? false;
   const image = theory.imageUrl || categoryImageUrl(getCategory(theory.category));
 
@@ -37,12 +37,23 @@ export default function TheoryTile({ theory, favoriteIds }: Props) {
         }}
       />
 
+      {/* Top + bottom dark gradients to keep title/summary readable.
+          pointer-events-none so clicks pass through to the Link layer. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/0"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/80 to-black/0"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/40 to-black/0"
       />
 
-      {/* Star button — top right */}
+      {/* Title — top left, non-interactive so card stays clickable */}
+      <h3 className="pointer-events-none absolute top-3 left-3 right-12 text-sm sm:text-base font-semibold leading-snug text-white line-clamp-2 drop-shadow">
+        {title}
+      </h3>
+
+      {/* Star — top right; pointer-events on so it intercepts clicks */}
       <div className="absolute top-2 right-2 z-10">
         <FavoriteButton
           theoryId={theory.id}
@@ -52,20 +63,16 @@ export default function TheoryTile({ theory, favoriteIds }: Props) {
         />
       </div>
 
-      {/* Title — bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-        <h3 className="text-sm sm:text-base font-semibold leading-snug text-white line-clamp-2">
-          {title}
-        </h3>
+      {/* Summary — bottom, non-interactive */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-3 sm:p-4">
         {theory.isSeed && theory.evidenceCount === 0 ? (
-          <p className="mt-1 text-[10px] font-mono-num uppercase tracking-wider text-amber-300">
-            Open question
+          <p className="text-[10px] font-mono-num uppercase tracking-wider text-amber-300 mb-1">
+            Open question — awaiting evidence
           </p>
-        ) : (
-          <p className="mt-1 text-[10px] font-mono-num text-white/70">
-            Score {theory.score}/9 · {theory.evidenceCount} evidence
-          </p>
-        )}
+        ) : null}
+        <p className="text-xs sm:text-sm text-white/85 leading-snug line-clamp-2">
+          {summary}
+        </p>
       </div>
     </article>
   );

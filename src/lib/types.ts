@@ -31,7 +31,8 @@ export type Theory = {
   titleDe?: string | null;   // Claude-translated German version
   summaryEn?: string | null;
   summaryDe?: string | null;
-  category: CategorySlug;
+  category: CategorySlug;             // primary category (breadcrumb home)
+  secondaryCategories?: CategorySlug[]; // additional categories the theory touches
   score: number; // 1..9
   evidenceCount: number;
   independentSources: number;

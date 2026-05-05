@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getCategory } from '../lib/categories';
 import { useI18n } from '../lib/i18n';
 import { localizeTheory } from '../lib/localize';
 import type { Theory } from '../lib/types';
@@ -36,6 +37,24 @@ export default function TheoryCard({ theory, favoriteIds }: Props) {
           onDark
         />
       </div>
+
+      {(theory.secondaryCategories?.length ?? 0) > 0 && (
+        <ul className="flex flex-wrap items-center gap-1.5 px-4 pt-3 pb-1">
+          {theory.secondaryCategories!.map((slug) => {
+            const c = getCategory(slug);
+            return (
+              <li key={slug}>
+                <Link
+                  to={`/category/${slug}`}
+                  className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-mono-num uppercase tracking-wider text-slate-600 hover:bg-slate-200 hover:text-ink"
+                >
+                  {c.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <div className="p-5 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-5">
         <div className="min-w-0">

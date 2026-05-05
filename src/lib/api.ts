@@ -58,7 +58,11 @@ type EvidenceRow = {
 
 type ProfileRow = { id: string; username: string };
 
-function rowToTheory(row: TheoryRow, usernamesById: Map<string, string>): Theory {
+function rowToTheory(
+  row: TheoryRow,
+  usernamesById: Map<string, string>,
+  secondaryCatsByTheory?: Map<string, CategorySlug[]>,
+): Theory {
   return {
     id: row.id,
     title: row.title,
@@ -68,6 +72,7 @@ function rowToTheory(row: TheoryRow, usernamesById: Map<string, string>): Theory
     summaryEn: row.summary_en,
     summaryDe: row.summary_de,
     category: row.category_slug,
+    secondaryCategories: secondaryCatsByTheory?.get(row.id) ?? [],
     youtubeId: row.youtube_id,
     status: row.status,
     score: row.score,
@@ -78,6 +83,45 @@ function rowToTheory(row: TheoryRow, usernamesById: Map<string, string>): Theory
     submittedAt: row.created_at,
     isSeed: row.is_seed ?? false,
   };
+}
+
+// Fetch secondary categories for a batch of theory ids in one query.
+// Returns a map: theory_id → list of secondary category slugs.
+async function fetchSecondaryCats(
+  theoryIds: string[],
+): Promise<Map<string, CategorySlug[]>> {
+  const map = new Map<string, CategorySlug[]>();
+  if (!supabase || theoryIds.length === 0) return map;
+  const { data, error } = await supabase
+    .from('theory_categories')
+    .select('theory_id, category_slug')
+    .in('theory_id', theoryIds);
+  if (error) return map;
+  for (const r of (data ?? []) as { theory_id: string; category_slug: CategorySlug }[]) {
+    const arr = map.get(r.theory_id) ?? [];
+    arr.push(r.category_slug);
+    map.set(r.theory_id, arr);
+  }
+  return map;
+}
+
+// Set the secondary categories for a theory (replaces the full set).
+export async function setSecondaryCategories(
+  theoryId: string,
+  slugs: CategorySlug[],
+): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  // Delete existing rows, then insert new set.
+  const { error: delErr } = await supabase
+    .from('theory_categories')
+    .delete()
+    .eq('theory_id', theoryId);
+  if (delErr) throw delErr;
+  if (slugs.length > 0) {
+    const rows = slugs.map((s) => ({ theory_id: theoryId, category_slug: s }));
+    const { error: insErr } = await supabase.from('theory_categories').insert(rows);
+    if (insErr) throw insErr;
+  }
 }
 
 function rowToEvidence(row: EvidenceRow, usernamesById: Map<string, string>): Evidence {
@@ -147,11 +191,29 @@ export async function listTheoriesPage(opts: {
     return { items: sliced, total, hasMore: offset + sliced.length < total };
   }
 
+  // For category filter: include theories where the slug is primary OR
+  // present in theory_categories (secondary). We collect matching IDs
+  // first, then filter the main query by those.
+  let idFilter: string[] | null = null;
+  if (category) {
+    const [primaryRes, secondaryRes] = await Promise.all([
+      supabase.from('theories').select('id').eq('category_slug', category).eq('status', 'accepted'),
+      supabase.from('theory_categories').select('theory_id').eq('category_slug', category),
+    ]);
+    const ids = new Set<string>();
+    for (const r of (primaryRes.data ?? []) as { id: string }[]) ids.add(r.id);
+    for (const r of (secondaryRes.data ?? []) as { theory_id: string }[]) ids.add(r.theory_id);
+    idFilter = Array.from(ids);
+    if (idFilter.length === 0) {
+      return { items: [], total: 0, hasMore: false };
+    }
+  }
+
   let q = supabase
     .from('theories')
     .select('*', { count: 'exact' })
     .eq('status', 'accepted');
-  if (category) q = q.eq('category_slug', category);
+  if (idFilter) q = q.in('id', idFilter);
 
   switch (sort) {
     case 'highest':
@@ -173,7 +235,8 @@ export async function listTheoriesPage(opts: {
   if (error) throw error;
   const rows = (data ?? []) as TheoryRow[];
   const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
-  const items = rows.map((r) => rowToTheory(r, usernames));
+  const secondary = await fetchSecondaryCats(rows.map((r) => r.id));
+  const items = rows.map((r) => rowToTheory(r, usernames, secondary));
   const total = count ?? items.length;
   return { items, total, hasMore: offset + items.length < total };
 }
@@ -232,7 +295,8 @@ export async function getTheory(id: string): Promise<Theory | null> {
   if (!data) return null;
   const row = data as TheoryRow;
   const usernames = await fetchUsernames([row.submitted_by]);
-  return rowToTheory(row, usernames);
+  const secondary = await fetchSecondaryCats([row.id]);
+  return rowToTheory(row, usernames, secondary);
 }
 
 export async function listEvidence(theoryId: string): Promise<Evidence[]> {

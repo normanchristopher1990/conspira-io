@@ -191,12 +191,25 @@ export default function TheoryDetailPage() {
               <YouTubeEmbed videoId={theory.youtubeId} title={localized.title} />
             </div>
             <div className="rounded-lg ring-1 ring-line bg-slate-50 p-4">
-              <h2 className="text-xs uppercase tracking-widest text-muted">
-                {t.detail.theoryScore}
-              </h2>
-              <div className="mt-3">
-                <ScoreBar score={theory.score} />
-              </div>
+              {theory.isSeed && theory.evidenceCount === 0 ? (
+                <div className="rounded-md bg-amber-50 ring-1 ring-amber-200 px-3 py-3 text-center">
+                  <p className="text-xs font-mono-num uppercase tracking-widest text-amber-900">
+                    {t.adminSeed.awaitingEvidence}
+                  </p>
+                  <p className="mt-2 text-xs text-amber-800 leading-relaxed">
+                    {t.adminSeed.awaitingEvidenceHint}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-xs uppercase tracking-widest text-muted">
+                    {t.detail.theoryScore}
+                  </h2>
+                  <div className="mt-3">
+                    <ScoreBar score={theory.score} />
+                  </div>
+                </>
+              )}
 
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <Stat label={t.detail.evidence} value={`${theory.evidenceCount}`} />

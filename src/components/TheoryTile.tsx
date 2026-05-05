@@ -31,7 +31,7 @@ export default function TheoryTile({ theory, favoriteIds }: Props) {
         src={image}
         alt=""
         loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        className="pointer-events-none absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).style.display = 'none';
         }}

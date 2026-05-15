@@ -1,18 +1,23 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/i18n';
 
 export default function BottomNav() {
   const { t } = useI18n();
+  const { isAdmin } = useAuth();
   return (
     <nav
       aria-label="Primary"
       className="md:hidden fixed inset-x-0 bottom-0 z-40 bg-white/95 backdrop-blur border-t border-line pb-[env(safe-area-inset-bottom)]"
     >
-      <ul className="grid grid-cols-4">
+      <ul className={isAdmin ? 'grid grid-cols-5' : 'grid grid-cols-4'}>
         <NavItem to="/" end label={t.nav.home} icon={<HomeIcon />} />
         <NavItem to="/search" label={t.nav.search} icon={<SearchIcon />} />
         <NavItem to="/submit" label={t.nav.submit} icon={<PlusIcon />} />
         <NavItem to="/me" label={t.nav.profile} icon={<PersonIcon />} />
+        {isAdmin && (
+          <NavItem to="/admin" label={t.nav.admin} icon={<ShieldIcon />} />
+        )}
       </ul>
     </nav>
   );
@@ -97,6 +102,15 @@ function PersonIcon() {
     <svg viewBox="0 0 24 24" className="h-6 w-6" {...stroke} aria-hidden>
       <circle cx="12" cy="8" r="3.5" />
       <path d="M4.5 20c1.5-3.5 4.5-5 7.5-5s6 1.5 7.5 5" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" {...stroke} aria-hidden>
+      <path d="M12 3l8 3v6c0 4.5-3.2 8.4-8 9-4.8-.6-8-4.5-8-9V6l8-3z" />
+      <path d="M9 12l2 2 4-4" />
     </svg>
   );
 }

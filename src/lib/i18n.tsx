@@ -17,7 +17,7 @@ const DEFAULT_LANG: Lang = 'en';
 // literals to `string` so DE can supply different strings while still
 // matching the structure key-for-key.
 export const EN = {
-  nav: { home: 'Home', search: 'Search', submit: 'Submit', profile: 'Profile' },
+  nav: { home: 'Home', search: 'Search', submit: 'Submit', profile: 'Profile', admin: 'Admin' },
   header: {
     signIn: 'Sign in',
     signOut: 'Sign out',
@@ -702,7 +702,7 @@ export const EN = {
 export type Strings = typeof EN;
 
 export const DE: Strings = {
-  nav: { home: 'Start', search: 'Suche', submit: 'Einreichen', profile: 'Profil' },
+  nav: { home: 'Start', search: 'Suche', submit: 'Einreichen', profile: 'Profil', admin: 'Admin' },
   header: {
     signIn: 'Anmelden',
     signOut: 'Abmelden',

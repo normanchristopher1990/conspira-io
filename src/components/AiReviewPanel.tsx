@@ -35,9 +35,12 @@ export default function AiReviewPanel({ review, theoryId, onRefresh }: Props) {
     }
   }
 
-  // Empty state — no review yet. Hide entirely from non-admins.
+  // The AI review is an admin-only tool — it informs the human-set score
+  // but is never shown publicly. Non-admins see no panel at all.
+  if (!isAdmin) return null;
+
+  // Empty state — no review yet (only admins reach here).
   if (!review) {
-    if (!isAdmin) return null;
     return (
       <section className="mt-6 rounded-xl ring-1 ring-dashed ring-line bg-white p-5">
         <header className="flex items-baseline justify-between gap-3">

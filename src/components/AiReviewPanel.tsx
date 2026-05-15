@@ -1,7 +1,13 @@
-import type { AiReview } from '../lib/api';
+import { useState } from 'react';
+import { triggerReview, type AiReview } from '../lib/api';
+import { useAuth } from '../lib/auth';
 import { useI18n } from '../lib/i18n';
 
-type Props = { review: AiReview | null };
+type Props = {
+  review: AiReview | null;
+  theoryId: string;
+  onRefresh: () => void;
+};
 
 const THEMATIC_COLOR: Record<AiReview['thematic'], string> = {
   supporting: '#1F8A4C',
@@ -10,9 +16,56 @@ const THEMATIC_COLOR: Record<AiReview['thematic'], string> = {
   neutral: '#9CA3AF',
 };
 
-export default function AiReviewPanel({ review }: Props) {
+export default function AiReviewPanel({ review, theoryId, onRefresh }: Props) {
   const { t } = useI18n();
-  if (!review) return null;
+  const { isAdmin } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function runReview() {
+    setError(null);
+    setBusy(true);
+    try {
+      await triggerReview(theoryId);
+      onRefresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.aiReview.runFailed);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Empty state — no review yet. Hide entirely from non-admins.
+  if (!review) {
+    if (!isAdmin) return null;
+    return (
+      <section className="mt-6 rounded-xl ring-1 ring-dashed ring-line bg-white p-5">
+        <header className="flex items-baseline justify-between gap-3">
+          <h2 className="text-sm font-semibold uppercase tracking-widest text-muted">
+            {t.aiReview.heading}
+          </h2>
+          <span className="text-[11px] font-mono-num text-muted">
+            {t.aiReview.adminOnlyHint}
+          </span>
+        </header>
+        <p className="mt-2 text-sm text-slate-600">{t.aiReview.empty}</p>
+        {error && (
+          <p className="mt-2 rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">
+            {error}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={runReview}
+          disabled={busy}
+          className="mt-3 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-60"
+        >
+          {busy ? t.aiReview.running : t.aiReview.runButton}
+        </button>
+      </section>
+    );
+  }
+
   const themeColor = THEMATIC_COLOR[review.thematic];
   const themeLabel = t.aiReview.thematic[review.thematic];
 
@@ -27,10 +80,28 @@ export default function AiReviewPanel({ review }: Props) {
             {review.model}
           </span>
         </div>
-        <span className="text-[11px] font-mono-num text-muted">
-          {new Date(review.reviewed_at).toLocaleString()}
-        </span>
+        <div className="flex items-baseline gap-3">
+          <span className="text-[11px] font-mono-num text-muted">
+            {new Date(review.reviewed_at).toLocaleString()}
+          </span>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={runReview}
+              disabled={busy}
+              className="text-[11px] font-medium text-brand hover:underline disabled:opacity-60"
+            >
+              {busy ? t.aiReview.running : t.aiReview.rerun}
+            </button>
+          )}
+        </div>
       </header>
+
+      {error && (
+        <p className="mt-2 rounded-md bg-score-bad/10 px-3 py-2 text-sm text-score-bad">
+          {error}
+        </p>
+      )}
 
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4 items-baseline">
         <div>

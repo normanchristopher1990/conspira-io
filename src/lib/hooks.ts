@@ -5,6 +5,7 @@ import {
   listAllProfiles,
   listComments,
   listEvidence,
+  listEvidenceNeedingReview,
   listTakedownsAdmin,
   listTakedownsPublic,
   listTheories,
@@ -13,6 +14,7 @@ import {
   listPendingTheories,
   type AiReview,
   type Comment,
+  type EvidenceForReview,
   type PublicProfile,
   type Takedown,
 } from './api';
@@ -72,6 +74,10 @@ export function useEvidence(theoryId: string | undefined): AsyncState<Evidence[]
 
 export function usePendingTheories(): AsyncState<Theory[]> {
   return useAsync(listPendingTheories, []);
+}
+
+export function useEvidenceNeedingReview(): AsyncState<EvidenceForReview[]> {
+  return useAsync(listEvidenceNeedingReview, []);
 }
 
 export function useAiReview(theoryId: string | undefined): AsyncState<AiReview | null> {

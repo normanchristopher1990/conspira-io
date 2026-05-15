@@ -4,7 +4,9 @@ import { useI18n } from '../../lib/i18n';
 export default function AdminLayout() {
   const { t } = useI18n();
   const tabs = [
+    { to: '/admin', label: t.admin.tabs.home, exact: true },
     { to: '/admin/theories', label: t.admin.tabs.theories },
+    { to: '/admin/evidence', label: t.admin.tabs.evidence },
     { to: '/admin/takedowns', label: t.admin.tabs.takedowns },
     { to: '/admin/users', label: t.admin.tabs.users },
   ];

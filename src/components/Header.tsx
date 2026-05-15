@@ -4,7 +4,7 @@ import { useI18n } from '../lib/i18n';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -44,6 +44,14 @@ export default function Header() {
               >
                 {profile?.username ?? '…'}
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="hidden sm:inline text-xs font-medium text-brand hover:underline px-2 py-1.5 rounded-md hover:bg-brand/5"
+                >
+                  {t.header.admin}
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={handleSignOut}

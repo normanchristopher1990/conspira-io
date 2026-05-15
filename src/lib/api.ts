@@ -564,6 +564,34 @@ export async function triggerReview(theoryId: string): Promise<void> {
   if (error) throw error;
 }
 
+// ---------- Evidence needing admin review ----------
+// Until CON-16 (nullable score) lands, "unrated" is approximated as score = 0
+// on evidence belonging to accepted theories. Returns at most 100 items,
+// newest first.
+
+export type EvidenceForReview = Evidence & {
+  theoryTitle: string;
+};
+
+export async function listEvidenceNeedingReview(): Promise<EvidenceForReview[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('evidence')
+    .select('*, theories!inner(id, title, status)')
+    .eq('score', 0)
+    .eq('theories.status', 'accepted')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  type Joined = EvidenceRow & { theories: { id: string; title: string } };
+  const rows = (data ?? []) as Joined[];
+  const usernames = await fetchUsernames(rows.map((r) => r.submitted_by));
+  return rows.map((row) => ({
+    ...rowToEvidence(row, usernames),
+    theoryTitle: row.theories.title,
+  }));
+}
+
 // ---------- Add evidence to existing theory ----------
 
 export async function addEvidence(

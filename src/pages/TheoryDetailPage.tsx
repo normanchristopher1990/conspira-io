@@ -27,7 +27,7 @@ export default function TheoryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: theory, loading, error } = useTheory(id);
   const { data: allEvidence } = useEvidence(id);
-  const { data: aiReview } = useAiReview(id);
+  const { data: aiReview, refetch: refetchAiReview } = useAiReview(id);
   const { data: comments } = useComments(id);
   const { profile: meProfile, isAdmin } = useAuth();
   const { t, lang } = useI18n();
@@ -213,7 +213,7 @@ export default function TheoryDetailPage() {
         </div>
       </article>
 
-      <AiReviewPanel review={aiReview} />
+      <AiReviewPanel review={aiReview} theoryId={theory.id} onRefresh={refetchAiReview} />
 
       <nav className="mt-8 flex items-center gap-1 border-b border-line overflow-x-auto scroll-hide">
         <TabButton active={tab === 'evidence'} onClick={() => setTab('evidence')}>

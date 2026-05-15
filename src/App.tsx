@@ -7,6 +7,8 @@ import { AuthProvider } from './lib/auth';
 import { I18nProvider, useI18n } from './lib/i18n';
 import AboutPage from './pages/AboutPage';
 import AddEvidencePage from './pages/AddEvidencePage';
+import AdminEvidence from './pages/admin/AdminEvidence';
+import AdminHome from './pages/admin/AdminHome';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminTakedowns from './pages/admin/AdminTakedowns';
 import AdminTheoriesQueue from './pages/admin/AdminTheoriesQueue';
@@ -57,8 +59,9 @@ export default function App() {
                   </RequireAuth>
                 }
               >
-                <Route index element={<AdminTheoriesQueue />} />
+                <Route index element={<AdminHome />} />
                 <Route path="theories" element={<AdminTheoriesQueue />} />
+                <Route path="evidence" element={<AdminEvidence />} />
                 <Route path="takedowns" element={<AdminTakedowns />} />
                 <Route path="users" element={<AdminUsers />} />
               </Route>
